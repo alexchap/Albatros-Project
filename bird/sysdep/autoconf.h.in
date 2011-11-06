@@ -9,6 +9,9 @@
 /* Include debugging code */
 #undef DEBUGGING
 
+/* Include route damping code */
+#undef ROUTE_DAMPING
+
 /* 8-bit integer type */
 #define INTEGER_8 ?
 
