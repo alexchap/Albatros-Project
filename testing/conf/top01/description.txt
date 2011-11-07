@@ -1,0 +1,45 @@
+# Sample config for a simple topology
+
+# Overview
+- two router
+- Basic BGP configuration between the two router
+- both listen on port 179
+
+ <rta>:10.10.10.11 <------> 10.10.10.12<rtb>
+	AS 65011	      AS 65012
+
+# Steps to follow
+
+1) Wire rta<->rtb with rj45
+2) Ip configuration
+
+rta :
+> ip addr add 10.10.10.11/32 dev eth0
+> ip ro add 10.10.10.12/32 dev eth0
+
+rtb :
+> ip addr add 10.10.10.12/32 dev eth0
+> ip ro add 10.10.10.11/32 dev eth0
+
+try a ping between the two -> it should work
+Equivalently : test connection on a port (eg 179 for BGP)
+rta : 
+> nc -l 179
+rtb : 
+> nc 10.10.10.11 179
+> type some text here that should appear on the other side !
+
+3) Start ssh server on one host -> access to both from one computer 
+-> don't have to switch screens if two different computers
+
+4) start bird on each router by using the option -c and the appropriate 
+configuration file
+
+
+NOTES
+
+- in order to spend less time writing ip addresses, edit the /etc/hosts file
+and add the following lines 
+10.10.10.11 rta
+10.10.10.12 rtb
+Like that, you can use simple names instead of ip addresses :-)
