@@ -7,6 +7,9 @@
 // delta_t set to 1 sec for now
 #define DELTA_T 1
 
+// ToDo : better values?
+#define N_REUSE_LISTS 10
+
 /**
  * Per-route configuration
  */
@@ -18,17 +21,16 @@ typedef struct {
 	time_t half_time_reachable;
 	time_t half_time_unreachable;
 
+	int ceiling;
+
 	int decay_array_size;
 	double* decay_array;
 
-	// computed configuration parameters
+	int* reuse_list_index;
+	list *reuse_lists;
 } damping_config;
 
-
-struct damping_info_;
-typedef struct damping_info_ damping_info;
-
-struct damping_info_ {
+typedef struct {
 	// Note : this needs to be first in the struct declaration
 	// to simplify access code
 	node reuse_list_node;
@@ -38,11 +40,15 @@ struct damping_info_ {
 
 	// not used yet
 	damping_config* config;
-};
+} damping_info;
 
 /**
  * Computes all the necessary parameters and
  * allocate the necessary tables (decay tables)
+ *
+ * Note : may be necessary to add some arguments to this function,
+ * since some of the configuration parameters are read from a 
+ * config file.
  */
 void damp_init_config(bgp_proto *, damping_config *);
 

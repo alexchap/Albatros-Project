@@ -10,6 +10,8 @@ void damp_init_config(bgp_proto *p, damping_config* conf)
 {
 	int i;
 
+	conf->ceiling = conf->reuse_threshold * exp(conf->tmax_hold / conf->half_time_unreachable) * log(2.0);
+
 	conf->decay_array_size = conf->tmax_hold / DELTA_T;
 	conf->decay_array = mb_alloc(p->p.pool, conf->decay_array_size * sizeof(double));
 
@@ -18,4 +20,6 @@ void damp_init_config(bgp_proto *p, damping_config* conf)
 	for(i = 2; i < conf->decay_array_size; ++i) {
 		conf->decay_array[i] = conf->decay_array[i-1] * conf->decay_array[1];
 	}
+
+	conf->reuse_lists = mb_alloc(p->p.pool, N_REUSE_LISTS * sizeof(list));
 }
