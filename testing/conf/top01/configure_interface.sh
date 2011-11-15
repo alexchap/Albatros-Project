@@ -19,15 +19,16 @@ sudo ip link set tap11 up
 sudo ip link set tap12 up
 
 # Edit routing tables
-sudo ip ro add 10.10.10.12/32 dev tap11  
 sudo ip ro add 10.10.10.11/32 dev tap12  
+sudo ip ro add 10.10.10.12/32 dev tap11  
 
 # Add specific routing tables for each router
-already_done=`cat /etc/iproute2/rt_tables | egrep "(rta|rtb)" | wc -l`
+already_done=`cat /etc/iproute2/rt_tables | egrep "(rta|rtb|flap)" | wc -l`
 if [ $already_done -lt 2 ]; then
    echo "The following content has been added to /etc/iproute2/rt_tables"
    echo "11	rta" | sudo tee -a /etc/iproute2/rt_tables
    echo "12	rtb" | sudo tee -a /etc/iproute2/rt_tables
+   echo "13	flap" | sudo tee -a /etc/iproute2/rt_tables
    echo "---"
 fi
 

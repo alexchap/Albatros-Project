@@ -1,0 +1,8 @@
+In order to connect to respective daemon, please use the commands :
+sudo birdc -s /usr/local/var/run/bird_rta.ctl
+sudo birdc -s /usr/local/var/run/bird_rtb.ctl
+
+Check the logs of the daemon
+tail -f /var/log/bird-top01-rta.log
+tail -f /var/log/bird-top01-rtb.log
+
