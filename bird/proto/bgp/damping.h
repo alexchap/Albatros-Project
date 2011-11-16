@@ -9,6 +9,7 @@
 
 // ToDo : better values?
 #define N_REUSE_LISTS 10
+#define DELTA_T_REUSE
 
 /**
  * Per-route configuration
@@ -26,7 +27,9 @@ typedef struct {
 	int decay_array_size;
 	double* decay_array;
 
-	int* reuse_list_index;
+	double reuse_scale_factor;
+
+	int* reuse_lists_index;
 	list *reuse_lists;
 } damping_config;
 
