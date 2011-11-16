@@ -2,6 +2,7 @@
 #define _DAMPING_H_
 
 #include "lib/lists.h"
+#include "lib/timer.h"
 #include "bgp.h"
 
 // delta_t set to 1 sec for now
@@ -40,7 +41,7 @@ typedef struct {
 	node reuse_list_node;
 
 	int figure_of_merit;
-	time_t last_time_udpated;
+	bird_clock_t last_time_udpated;
 
 	// not used yet
 	damping_config* config;

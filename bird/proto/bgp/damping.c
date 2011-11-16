@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "lib/slists.h"
+#include "lib/timer.h"
 
 #include "damping.h"
 
@@ -20,12 +21,24 @@ static int get_reuse_list_index(int penalty)
 	return index;
 }
 
+static int get_new_figure_of_merit(damping_info* info, bird_clock_t n)
+{
+	clock_diff_t diff = n - info->last_time_updated;
+	int i = diff / DELTA_T;
+
+	if(i >= info->decay_array_size)
+		return 0;
+	else
+		return info->decay_array[i] * info->figure_of_merit;
+}
+
 // Note : will need some synchronization primitives for that!
 static void reuse_timer_handler()
 {
 	int index;
 	damp_info *info;
 	snode *n;
+	bird_clock_t t_diff;
 
 	// XXX : probably not the best solution : make a shallow copy
 	// of the list's head so it can be re-initialized to an empty list
@@ -36,12 +49,9 @@ static void reuse_timer_handler()
 
 	WALK_SLIST(n, &l) {
 		info = (damp_info*)n;
-		
-		// ToDo : update t-diff
-		// how do we implement timing informations?
 
-		info->figure_of_merit = info->figure_of_merit * config.decay_array[t_diff];
-		info->last_time_updated = t_now;
+		info->figure_of_merit = get_new_figure_of_merit(info, now);
+		info->last_time_updated = now;
 
 		if(info->figure_of_merit < config.reuse_threshold) {
 			// reuse route
