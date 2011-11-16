@@ -29,6 +29,7 @@ typedef struct {
 
 	double reuse_scale_factor;
 
+	int reuse_list_current_offset;
 	int* reuse_lists_index;
 	list *reuse_lists;
 } damping_config;

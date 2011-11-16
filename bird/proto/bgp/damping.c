@@ -1,10 +1,57 @@
 
 #include <math.h>
 
+#include "lib/slists.h"
+
 #include "damping.h"
 
 // for now, multiple configurations are not supported
 damping_config config;
+
+static int get_reuse_list_index(int penalty)
+{
+	double r = ((double)penalty / config.cut_threshold) - 1.0;
+	int index = r * config.scale_factor;
+	if(index >= N_REUSE_LISTS)
+		index = N_REUSE_LISTS-1;
+
+	index = config.reuse_lists_index[index];
+	index = (index + config.reuse_list_current_offset) % N_REUSE_LISTS;
+	return index;
+}
+
+// Note : will need some synchronization primitives for that!
+static void reuse_timer_handler()
+{
+	int index;
+	damp_info *info;
+	snode *n;
+
+	// XXX : probably not the best solution : make a shallow copy
+	// of the list's head so it can be re-initialized to an empty list
+	slist l = config.reuse_lists[config.reuse_list_current_offset];
+	s_init(&config.reuse_lists[config.reuse_list_current_offset]);
+
+	config.reuse_list_current_offset++;
+
+	WALK_SLIST(n, &l) {
+		info = (damp_info*)n;
+		
+		// ToDo : update t-diff
+		// how do we implement timing informations?
+
+		info->figure_of_merit = info->figure_of_merit * config.decay_array[t_diff];
+		info->t_updated = t_now;
+
+		if(info->figure_of_merit < config.reuse_threshold) {
+			// reuse route
+		} else {
+			// put back route into another reuse list
+			index = get_reuse_list_index(info->figure_of_merit);
+			s_add_tail(&config.reuse_lists[index], n);
+		}
+	}
+}
 
 void damp_init_config(bgp_proto *p, damping_config* conf)
 {
@@ -35,4 +82,6 @@ void damp_init_config(bgp_proto *p, damping_config* conf)
 		conf->reuse_lists_index = (int)((conf->half_time_unreachable / DELTA_T_REUSE) *
 				log(1.0 / (conf->reuse_threshold * (1 + (i / scale_factor))) / log(0.5)));
 	}
+
+	conf->reuse_list_current_offset = 0;
 }
