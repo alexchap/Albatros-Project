@@ -41,7 +41,7 @@ static void reuse_timer_handler()
 		// how do we implement timing informations?
 
 		info->figure_of_merit = info->figure_of_merit * config.decay_array[t_diff];
-		info->t_updated = t_now;
+		info->last_time_updated = t_now;
 
 		if(info->figure_of_merit < config.reuse_threshold) {
 			// reuse route
