@@ -1,0 +1,8 @@
+Use of uninitialized value $type in numeric eq (==) at ./zebra-dump-parser.pl line 421.
+Use of uninitialized value $type in numeric eq (==) at ./zebra-dump-parser.pl line 450.
+Use of uninitialized value $type in numeric eq (==) at ./zebra-dump-parser.pl line 457.
+Use of uninitialized value $type in numeric eq (==) at ./zebra-dump-parser.pl line 461.
+Died at ./zebra-dump-parser.pl line 463.
+Command exited with non-zero status 255
+0.04user 0.00system 0:00.05elapsed 89%CPU (0avgtext+0avgdata 10256maxresident)k
+0inputs+0outputs (0major+692minor)pagefaults 0swaps

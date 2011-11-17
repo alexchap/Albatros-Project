@@ -68,6 +68,10 @@
 
 #include "bgp.h"
 
+#ifdef ROUTE_DAMPING
+#include "damping.h"
+#endif
+
 struct linpool *bgp_linpool;		/* Global temporary pool */
 static sock *bgp_listen_sk;		/* Global listening socket */
 static int bgp_counter;			/* Number of protocol instances using the listening socket */
@@ -918,6 +922,11 @@ bgp_init(struct proto_config *C)
 
 #ifdef ROUTE_DAMPING
   // initialize route damping data structures
+  // XXX: check it works ! 
+  p->damping = c-> damping;
+  if(p->damping)
+    p->dcf = c->dcf;
+
 #endif
 
   return P;
@@ -1017,6 +1026,11 @@ bgp_check(struct bgp_config *c)
   /* Different default for gw_mode */
   if (!c->gw_mode)
     c->gw_mode = (c->multihop || internal) ? GW_RECURSIVE : GW_DIRECT;
+
+#ifdef ROUTE_DAMPING
+  /* Check damping configuration */
+  damp_check(c->dcf);
+#endif
 }
 
 static char *bgp_state_names[] = { "Idle", "Connect", "Active", "OpenSent", "OpenConfirm", "Established", "Close" };

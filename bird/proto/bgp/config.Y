@@ -9,10 +9,12 @@
 CF_HDR
 
 #include "proto/bgp/bgp.h"
+#include "proto/bgp/damping.h"
 
 CF_DEFINES
 
 #define BGP_CFG ((struct bgp_config *) this_proto)
+
 
 CF_DECLS
 
@@ -25,7 +27,9 @@ CF_KEYWORDS(BGP, LOCAL, NEIGHBOR, AS, HOLD, TIME, CONNECT, RETRY,
 	CLUSTER, ID, AS4, ADVERTISE, IPV4, CAPABILITIES, LIMIT, PASSIVE,
 	PREFER, OLDER, MISSING, LLADDR, DROP, IGNORE, ROUTE, REFRESH,
 	INTERPRET, COMMUNITIES, BGP_ORIGINATOR_ID, BGP_CLUSTER_LIST, IGP,
-	TABLE, GATEWAY, DIRECT, RECURSIVE, MED, TTL, SECURITY)
+	TABLE, GATEWAY, DIRECT, RECURSIVE, MED, TTL, SECURITY,
+	DAMPING, HALF_TIME_REACHABLE, HALF_TIME_UNREACHABLE,
+	CUT_THRESHOLD, REUSE_THRESHOLD, TMAX_HOLD )
 
 CF_GRAMMAR
 
@@ -49,6 +53,9 @@ bgp_proto_start: proto_start BGP {
      BGP_CFG->advertise_ipv4 = 1;
      BGP_CFG->interpret_communities = 1;
      BGP_CFG->default_local_pref = 100;
+     BGP_CFG->damping = 0;
+     BGP_CFG->dcf = new_damping_config(&proto_bgp, 2000,750,900,15,15);
+
  }
  ;
 
@@ -99,6 +106,14 @@ bgp_proto:
  | bgp_proto INTERPRET COMMUNITIES bool ';' { BGP_CFG->interpret_communities = $4; }
  | bgp_proto IGP TABLE rtable ';' { BGP_CFG->igp_table = $4; }
  | bgp_proto TTL SECURITY bool ';' { BGP_CFG->ttl_security = $4; }
+ | bgp_proto ROUTE DAMPING bool ';' { BGP_CFG->damping = $4; }
+ | bgp_proto REUSE_TRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
+ | bgp_proto REUSE_TRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
+ | bgp_proto CUT_TRESHOLD expr ';' { BGP_CFG->dcf->cut_threshold = $3;}
+ | bgp_proto HALF_TIME_REACHABLE expr ';' { BGP_CFG->dcf->half_time_reachable = $3;}
+ | bgp_proto HALF_TIME_UNREACHABLE expr ';' { BGP_CFG->dcf->half_time_unreachable = $3;}
+ | bgp_proto TMAX_HOLD expr ';' { BGP_CFG->dcf->tmax_hold = $3;}
+
  ;
 
 CF_ADDTO(dynamic_attr, BGP_ORIGIN

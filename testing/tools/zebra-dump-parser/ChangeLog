@@ -1,0 +1,12 @@
+2008-09-13  Marco d'Itri  <md@linux.it>
+ * Added the drop-stats program.
+
+2007-11-25  Marco d'Itri  <md@linux.it>
+ * Added support for MSG_TABLE_DUMP_V2 (dumps from RIPE RIS with 32 bit ASNs).
+
+2007-05-07  Marco d'Itri  <md@linux.it>
+ * Started a changelog.
+ * Switched to "use constant".
+ * Refactored a bit.
+ * Do not show the unused TABLE_DUMP status field.
+

@@ -6,8 +6,7 @@
 
 #include "damping.h"
 
-// for now, multiple configurations are not supported
-damping_config config;
+damping_config dcf;
 
 static int get_reuse_list_index(int penalty)
 {
@@ -63,8 +62,17 @@ static void reuse_timer_handler()
 	}
 }
 
-void damp_init_config(bgp_proto *p, damping_config* conf)
+struct damping_config *new_damping_config(bgp_proto *p, int cut_threshold, int reuse_threshold,
+		int tmax_hold, int half_time_reachable, int half_time_unreachable)
 {
+         // XXX : is that accurate ?
+        struct damping_config *conf = cfg_allocz(sizof(damping_config));
+	conf->cut_threshold = cut_threshold;
+	conf->reuse_threshold = reuse_threshold;
+	conf->tmax_hold = tmax_hold;
+	conf->half_time_reachable = half_time_reachable;
+	conf->half_time_unreachable = half_time_unreachable;
+
 	int i;
 	double max_ratio, t;
 
@@ -94,4 +102,12 @@ void damp_init_config(bgp_proto *p, damping_config* conf)
 	}
 
 	conf->reuse_list_current_offset = 0;
+	//XXX : is that right ? return pointer to configuration ?!
+	return &conf;
+}
+
+/* This function check the damping parameters */
+void damp_check(struct damping_config *dcf) {
+      // TODO: check parameters !
+
 }
