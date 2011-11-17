@@ -1,0 +1,4 @@
+# TODO in order to avoid wasting time
+
+- automate ip addresses assignment (and ip ro) in configure_interface
+- move generator at right place + start it automatically once the router A is started

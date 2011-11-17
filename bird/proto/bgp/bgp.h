@@ -12,6 +12,10 @@
 #include <stdint.h>
 #include "nest/route.h"
 
+#ifdef ROUTE_DAMPING
+#include "damp.h"
+#endif
+
 struct linpool;
 struct eattr;
 
@@ -51,6 +55,7 @@ struct bgp_config {
   unsigned disable_after_error;		/* Disable the protocol when error is detected */
   char *password;			/* Password used for MD5 authentication */
   struct rtable_config *igp_table;	/* Table used for recursive next hop lookups */
+  
 };
 
 #define MLL_SELF 1
@@ -114,6 +119,11 @@ struct bgp_proto {
   byte *mp_reach_start, *mp_unreach_start; /* Multiprotocol BGP attribute notes */
   unsigned mp_reach_len, mp_unreach_len;
   ip_addr local_link;			/* Link-level version of source_addr */
+#endif
+
+#ifdef ROUTE_DAMPING
+  int damping;				/* Enable/Disable route damping */
+  struct damping_config *dcf;		/* Route flap damping configuration */
 #endif
 };
 

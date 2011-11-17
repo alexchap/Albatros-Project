@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+# set $format = 2 in zebra-dump-parser.pl.
+
+wget -O data.drop http://www.spamhaus.org/drop/drop.lasso
+wget -O data.asn.tmp http://www.potaroo.net/bgp/iana/asn-ctl.txt \
+  && mv data.asn.tmp data.asn || true
+
+wget -c --progress=dot:mega http://data.ris.ripe.net/rrc00/$(date +%Y.%m)/bview.$(date +%Y%m%d).0759.gz
+zcat bview.*.gz | nice ./zebra-dump-parser.pl > data.routes.tmp
+mv data.routes.tmp data.routes
+rm bview.*.gz
+
+nice ./drop-stats --as-names=data.asn --drop=data.drop --routes=data.routes \
+  > drop-stats.txt.tmp
+mv drop-stats.txt.tmp drop-stats.txt
+

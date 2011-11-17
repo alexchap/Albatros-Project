@@ -14,6 +14,7 @@
 
 /**
  * Per-route configuration
+ * XXX: isn't it per bgp_instance configuration ?
  */
 typedef struct {
 	int cut_threshold;
@@ -35,6 +36,7 @@ typedef struct {
 	list *reuse_lists;
 } damping_config;
 
+// XXX: per route configuration -> yes !
 typedef struct {
 	node reuse_list_node;
 
@@ -53,7 +55,12 @@ typedef struct {
  * since some of the configuration parameters are read from a
  * config file.
  */
-void damp_init_config(bgp_proto *, damping_config *);
+struct damping_config *new_damping_config(bgp_proto *, int cut_threshold,
+                                   int reuse_threshold, int tmax_hold, 
+				   int half_time_reachable, int half_time_unreachable);
+
+// Check damping configuration
+void damp_check(damping_config *);
 
 /**
  * Functions to call when a route is either advertised as
