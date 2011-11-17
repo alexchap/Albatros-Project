@@ -2,7 +2,6 @@
 
 #include "nest/bird.h"
 
-#include "lib/slists.h"
 #include "lib/timer.h"
 
 #include "bgp.h"
@@ -56,7 +55,9 @@ static void reuse_timer_handler(void)
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf.reuse_threshold) {
-			// reuse route
+			rte_update((info->bgp_connection->bgp)->p.table,
+					(info->route)->net, &(info->bgp_connection->bgp->p),
+					&(info->bgp_connection->bgp->p), info->route);
 		} else {
 			// put back route into another reuse list
 			index = get_reuse_list_index(info->figure_of_merit);
@@ -117,6 +118,52 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 }
 
 /* This function checks the damping parameters */
-void damp_check(struct damping_config *dcf) {
+void damp_check(struct damping_config *dcf)
+{
       // TODO: check parameters !
+}
+
+void damp_remove_route(rte *route)
+{
+	damping_info *info = route->attrs->damping;
+	struct bgp_conn *connection = info->bgp_connection;
+	time_t t_diff;
+	int index;
+
+	if(info == NULL) {
+		// allocate damping struct
+		info->figure_of_merit = 1;
+		rte_update(connection->bgp->p.table,
+				route->net, &(connection->bgp->p),
+				&(connection->bgp->p), NULL);
+		return;
+	}
+
+	t_diff = now - info->last_time_updated;
+	index = t_diff / DELTA_T;
+	if(index >= dcf.decay_array_size) {
+		info->figure_of_merit = 1;
+		return;
+	}
+
+	info->figure_of_merit = get_new_figure_of_merit(info, now) +1;
+	if(info->figure_of_merit > dcf.ceiling)
+		info->figure_of_merit = dcf.ceiling;
+
+	index = get_reuse_list_index(info->figure_of_merit);
+	if(info->current_reuse_list != NULL) {
+		s_rem_node(&(info->reuse_list_node));
+		// if the route is not in a reuse list, it has not been suppressed yet,
+		// and it needs to be removed
+		rte_update(connection->bgp->p.table,
+				route->net, &(connection->bgp->p),
+				&(connection->bgp->p), NULL);
+	}
+
+	s_add_tail(&(dcf.reuse_lists[index]), &(info->reuse_list_node));
+	info->current_reuse_list = &(dcf.reuse_lists[index]);
+}
+
+void damp_add_route(rte *route)
+{
 }

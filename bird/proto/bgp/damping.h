@@ -2,6 +2,7 @@
 #define _DAMPING_H_
 
 #include "lib/timer.h"
+#include "lib/slists.h"
 
 // delta_t set to 1 sec for now
 #define DELTA_T 1
@@ -12,6 +13,8 @@
 
 struct protocol;
 struct slist;
+struct rte;
+struct bgp_conn;
 
 /**
  * BGP damping config
@@ -36,24 +39,26 @@ typedef struct damping_config {
 	struct slist *reuse_lists;
 } damping_config;
 
-
 typedef struct damping_info {
-	node reuse_list_node;
+	snode reuse_list_node;
+	slist *current_reuse_list;
 
 	int figure_of_merit;
 	time_t last_time_updated;
 
-	// not used yet
-	damping_config* config;
+	struct rte* route;
+	struct bgp_conn* bgp_connection;
 } damping_info;
 
 /**
  * Computes all the necessary parameters and
  * allocate the necessary tables (decay tables)
  *
- * Note : may be necessary to add some arguments to this function,
+ * Note 1: may be necessary to add some arguments to this function,
  * since some of the configuration parameters are read from a
  * config file.
+ * XXX : see compiler's warning. Incompatible pointer type in cf-parse.y
+ * this may cause some undefined behaviour.
  */
 struct damping_config *new_damping_config(struct bgp_proto*, int cut_threshold,
                                    int reuse_threshold, int tmax_hold, 
@@ -62,11 +67,7 @@ struct damping_config *new_damping_config(struct bgp_proto*, int cut_threshold,
 // Check damping configuration
 void damp_check(damping_config *);
 
-/**
- * Functions to call when a route is either advertised as
- * reachable/unreachable
- */
-/*void damp_add_route();
-void damp_remove_route();*/
+void damp_remove_route(struct rte*);
+void damp_add_route(struct rte*);
 
 #endif /* _DAMPING_H_ */
