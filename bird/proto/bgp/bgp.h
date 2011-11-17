@@ -11,13 +11,14 @@
 
 #include <stdint.h>
 #include "nest/route.h"
-
-#ifdef ROUTE_DAMPING
-#include "damp.h"
-#endif
+#include "nest/protocol.h"
 
 struct linpool;
 struct eattr;
+
+#ifdef ROUTE_DAMPING
+struct damping_config;
+#endif
 
 struct bgp_config {
   struct proto_config c;
@@ -56,6 +57,10 @@ struct bgp_config {
   char *password;			/* Password used for MD5 authentication */
   struct rtable_config *igp_table;	/* Table used for recursive next hop lookups */
   
+#ifdef ROUTE_DAMPING
+  struct damping_config* dcf;
+  int damping;
+#endif
 };
 
 #define MLL_SELF 1

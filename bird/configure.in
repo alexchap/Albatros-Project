@@ -57,6 +57,7 @@ fi
 
 AC_SEARCH_LIBS(clock_gettime,[c rt posix4])
 
+AC_SEARCH_LIBS([exp,log],[m])
 AC_CANONICAL_HOST
 
 # Store this value because ac_test_CFLAGS is overwritten by AC_PROG_CC

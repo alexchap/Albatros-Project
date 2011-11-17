@@ -107,13 +107,11 @@ bgp_proto:
  | bgp_proto IGP TABLE rtable ';' { BGP_CFG->igp_table = $4; }
  | bgp_proto TTL SECURITY bool ';' { BGP_CFG->ttl_security = $4; }
  | bgp_proto ROUTE DAMPING bool ';' { BGP_CFG->damping = $4; }
- | bgp_proto REUSE_TRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
- | bgp_proto REUSE_TRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
- | bgp_proto CUT_TRESHOLD expr ';' { BGP_CFG->dcf->cut_threshold = $3;}
+ | bgp_proto REUSE_THRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
+ | bgp_proto CUT_THRESHOLD expr ';' { BGP_CFG->dcf->cut_threshold = $3;}
  | bgp_proto HALF_TIME_REACHABLE expr ';' { BGP_CFG->dcf->half_time_reachable = $3;}
  | bgp_proto HALF_TIME_UNREACHABLE expr ';' { BGP_CFG->dcf->half_time_unreachable = $3;}
  | bgp_proto TMAX_HOLD expr ';' { BGP_CFG->dcf->tmax_hold = $3;}
-
  ;
 
 CF_ADDTO(dynamic_attr, BGP_ORIGIN
