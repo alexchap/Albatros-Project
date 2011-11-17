@@ -1,4 +1,3 @@
-
 #include <math.h>
 
 #include "lib/slists.h"
@@ -39,6 +38,8 @@ static void reuse_timer_handler()
 	damp_info *info;
 	snode *n;
 	bird_clock_t t_diff;
+
+	// reset timer
 
 	// XXX : probably not the best solution : make a shallow copy
 	// of the list's head so it can be re-initialized to an empty list

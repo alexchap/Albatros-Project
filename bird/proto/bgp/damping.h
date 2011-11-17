@@ -10,7 +10,7 @@
 
 // ToDo : better values?
 #define N_REUSE_LISTS 10
-#define DELTA_T_REUSE
+#define DELTA_T_REUSE 5
 
 /**
  * Per-route configuration
@@ -36,8 +36,6 @@ typedef struct {
 } damping_config;
 
 typedef struct {
-	// Note : this needs to be first in the struct declaration
-	// to simplify access code
 	node reuse_list_node;
 
 	int figure_of_merit;
@@ -52,9 +50,16 @@ typedef struct {
  * allocate the necessary tables (decay tables)
  *
  * Note : may be necessary to add some arguments to this function,
- * since some of the configuration parameters are read from a 
+ * since some of the configuration parameters are read from a
  * config file.
  */
 void damp_init_config(bgp_proto *, damping_config *);
+
+/**
+ * Functions to call when a route is either advertised as
+ * reachable/unreachable
+ */
+void damp_add_route();
+void damp_remove_route();
 
 #endif /* _DAMPING_H_ */
