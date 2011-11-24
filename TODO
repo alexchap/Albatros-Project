@@ -1,0 +1,11 @@
+TODO project albatros
+
+Status : 24th November 2011
+
+- Hoook updates/withdrawals in bgp.c (ref: from §4.8.4... RFC)
+- Debugging messages for route damping
+- Create a function show damped routes & enable it from birdc interface
+- Add CLI messages to config file parser (config.Y)
+- Comment code ! (references to RFC etc.)
+- FIX problem when no damping -> can we define a conditional grammar in config.Y ?
+  i.e if route damping is disabled, no need to create damping_config !

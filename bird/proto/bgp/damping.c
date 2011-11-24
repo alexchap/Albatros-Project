@@ -7,6 +7,8 @@
 #include "bgp.h"
 #include "damping.h"
 
+// #define LOCAL_DEBUG 1
+
 damping_config dcf;
 
 static inline int is_suppressed(damping_info *info)
@@ -97,6 +99,7 @@ struct damping_config *new_damping_config(
 	dcf.half_time_reachable = half_time_reachable;
 	dcf.half_time_unreachable = half_time_unreachable;
 
+        DBG("New damping_config, with parameters (%d,%d,%d,%d,%d)\n",cut_threshold,reuse_threshold,tmax_hold,half_time_reachable,half_time_unreachable);
 	dcf.ceiling = dcf.reuse_threshold * exp(dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0);
 
 	dcf.decay_array_size = dcf.tmax_hold / DELTA_T;

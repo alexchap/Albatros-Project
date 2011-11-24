@@ -1,0 +1,16 @@
+BGP: Startup.
+BGP: Got lock
+BGP: Creating listening socket
+TESTING DEBUG MESSAGEBGP: connect_timeout
+BGP: Closing connection
+BGP: Connecting
+BGP: Waiting for connect success
+BGP: Closing connection
+BGP: Decision start
+BGP: Startup.
+BGP: Got lock
+BGP: Creating listening socket
+TESTING DEBUG MESSAGEBGP: Startup.
+BGP: Got lock
+BGP: Creating listening socket
+TESTING DEBUG MESSAGE

@@ -1,0 +1,20 @@
+# Sample config for a simple topology
+
+# Prerequisites
+- Open Vpn (package openvpn)
+- vde_switch (package vde2)
+- iproute2 (normally included in linux distro)
+
+# Overview
+- two routers
+- Router A with Route damping enabled
+- Basic BGP configuration between the two router
+- both listen on port 179
+
+ <rta>:10.10.10.11 <------> 10.10.10.12<rtb>
+	AS 65011	      AS 65012
+
+# Steps to follow
+
+Setup : run the script ./configure_interface.sh
+Reset : run the script ./reset.sh
