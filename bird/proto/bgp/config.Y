@@ -55,7 +55,6 @@ bgp_proto_start: proto_start BGP {
      BGP_CFG->default_local_pref = 100;
      BGP_CFG->damping = 0;
      BGP_CFG->dcf = new_damping_config(2000,750,900,15,15);
-
  }
  ;
 
