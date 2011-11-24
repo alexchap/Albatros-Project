@@ -81,7 +81,9 @@ static void reuse_timer_handler(struct timer* t)
 	#undef log
 #endif
 
-struct damping_config *new_damping_config(struct bgp_proto *p,
+
+// Note : the reuse timer will need to be allocated later (init function?)
+struct damping_config *new_damping_config(
 		int cut_threshold, int reuse_threshold,
 		int tmax_hold,     int half_time_reachable,
 		int half_time_unreachable)
@@ -98,7 +100,7 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 	dcf.ceiling = dcf.reuse_threshold * exp(dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0);
 
 	dcf.decay_array_size = dcf.tmax_hold / DELTA_T;
-	dcf.decay_array = mb_alloc(p->p.pool, dcf.decay_array_size * sizeof(double));
+	dcf.decay_array = cfg_alloc(dcf.decay_array_size * sizeof(double));
 
 	dcf.decay_array[0] = 1.0;
 	dcf.decay_array[1] = exp(log(0.5) * (1.0 / (dcf.half_time_unreachable / DELTA_T)));
@@ -111,8 +113,8 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 	if(max_ratio > t)
 		max_ratio = t;
 
-	dcf.reuse_lists = mb_alloc(p->p.pool, N_REUSE_LISTS * sizeof(list));
-	dcf.reuse_lists_index = mb_alloc(p->p.pool, N_REUSE_LISTS * sizeof(int));
+	dcf.reuse_lists = cfg_alloc(N_REUSE_LISTS * sizeof(list));
+	dcf.reuse_lists_index = cfg_alloc(N_REUSE_LISTS * sizeof(int));
 	dcf.reuse_scale_factor = (double)(N_REUSE_LISTS / (max_ratio - 1));
 
 	for(i = 0; i < N_REUSE_LISTS; ++i) {
@@ -122,9 +124,6 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 	}
 
 	dcf.reuse_list_current_offset = 0;
-
-	dcf.reuse_list_timer = tm_new(p->p.pool);
-	(dcf.reuse_list_timer)->hook = reuse_timer_handler;
 	return &dcf;
 }
 

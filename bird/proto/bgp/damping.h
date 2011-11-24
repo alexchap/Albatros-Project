@@ -62,7 +62,7 @@ typedef struct damping_info {
  * XXX : see compiler's warning. Incompatible pointer type in cf-parse.y
  * this may cause some undefined behaviour.
  */
-struct damping_config *new_damping_config(struct bgp_proto*, int cut_threshold,
+struct damping_config *new_damping_config(int cut_threshold,
                                    int reuse_threshold, int tmax_hold, 
 								   int half_time_reachable, int half_time_unreachable);
 
