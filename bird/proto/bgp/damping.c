@@ -38,7 +38,7 @@ static int get_new_figure_of_merit(damping_info* info, bird_clock_t n)
 }
 
 // ToDo : ensure that no synchronization primitives are needed here
-static void reuse_timer_handler(void)
+static void reuse_timer_handler(struct timer* t)
 {
 	int index;
 	damping_info *info;
@@ -50,6 +50,8 @@ static void reuse_timer_handler(void)
 	// of the list's head so it can be re-initialized to an empty list
 	slist l = dcf.reuse_lists[dcf.reuse_list_current_offset];
 	s_init_list(&dcf.reuse_lists[dcf.reuse_list_current_offset]);
+
+	tm_start(t, DELTA_T_REUSE);
 
 	dcf.reuse_list_current_offset++;
 
@@ -120,6 +122,9 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 	}
 
 	dcf.reuse_list_current_offset = 0;
+
+	dcf.reuse_list_timer = tm_new(p->p.pool);
+	(dcf.reuse_list_timer)->hook = reuse_timer_handler;
 	return &dcf;
 }
 
@@ -197,17 +202,17 @@ void damp_add_route(struct bgp_proto *proto, rte *route)
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
 	} else if(is_suppressed(info) && info->figure_of_merit < dcf.reuse_threshold) {
-		rem_node(info);
+		s_rem_node((snode*)info);
 		info->current_reuse_list = NULL;
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
 	} else {
-		index = get_reuse_list_index(info);
+		index = get_reuse_list_index(info->figure_of_merit);
 		if(is_suppressed(info))
-			rem_node(info);
+			s_rem_node((snode*)info);
 
-		s_add_tail(&dcf.reuse_lists[index], info);
+		s_add_tail(&dcf.reuse_lists[index], (snode*)info);
 		info->current_reuse_list = &dcf.reuse_lists[index];
 	}
 

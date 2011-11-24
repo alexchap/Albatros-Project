@@ -37,6 +37,8 @@ typedef struct damping_config {
 	int reuse_list_current_offset;
 	int* reuse_lists_index;
 	struct slist *reuse_lists;
+
+	timer *reuse_list_timer;
 } damping_config;
 
 typedef struct damping_info {
