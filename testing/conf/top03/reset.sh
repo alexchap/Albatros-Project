@@ -13,5 +13,7 @@ sudo openvpn --rmtun --dev tap11
 sudo openvpn --rmtun --dev tap12
 
 echo "Deleting logs"
-sudo rm /var/log/bird-top01-rta.log
-sudo rm /var/log/bird-top01-rtb.log
+sudo rm /var/log/bird-top03-rta.log
+sudo rm /var/log/bird-top03-rtb.log
+sudo rm /var/log/bird-top03-rta.debug
+sudo rm /var/log/bird-top03-rtb.debug
