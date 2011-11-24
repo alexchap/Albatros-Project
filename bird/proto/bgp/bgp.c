@@ -920,15 +920,6 @@ bgp_init(struct proto_config *C)
   p->rr_client = c->rr_client;
   p->igp_table = get_igp_table(c);
 
-#ifdef ROUTE_DAMPING
-  // initialize route damping data structures
-  // XXX: check it works ! 
-  p->damping = c-> damping;
-  if(p->damping)
-    p->dcf = c->dcf;
-
-#endif
-
   return P;
 }
 
