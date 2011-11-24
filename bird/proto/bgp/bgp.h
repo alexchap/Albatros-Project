@@ -56,11 +56,8 @@ struct bgp_config {
   unsigned disable_after_error;		/* Disable the protocol when error is detected */
   char *password;			/* Password used for MD5 authentication */
   struct rtable_config *igp_table;	/* Table used for recursive next hop lookups */
-  
-#ifdef ROUTE_DAMPING
-  struct damping_config* dcf;
-  int damping;
-#endif
+  int damping;				/* Enable/Disable route damping */
+  struct damping_config *dcf;		/* Route flap damping configuration */
 };
 
 #define MLL_SELF 1
@@ -126,10 +123,6 @@ struct bgp_proto {
   ip_addr local_link;			/* Link-level version of source_addr */
 #endif
 
-#ifdef ROUTE_DAMPING
-  int damping;				/* Enable/Disable route damping */
-  struct damping_config *dcf;		/* Route flap damping configuration */
-#endif
 };
 
 struct bgp_prefix {
