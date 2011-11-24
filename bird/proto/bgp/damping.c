@@ -9,6 +9,11 @@
 
 damping_config dcf;
 
+static inline int is_suppressed(damping_info *info)
+{
+	return (info->current_reuse_list == NULL);
+}
+
 static int get_reuse_list_index(int penalty)
 {
 	double r = ((double)penalty / dcf.cut_threshold) - 1.0;
@@ -32,7 +37,7 @@ static int get_new_figure_of_merit(damping_info* info, bird_clock_t n)
 		return dcf.decay_array[i] * info->figure_of_merit;
 }
 
-// Note : will need some synchronization primitives for that!
+// ToDo : ensure that no synchronization primitives are needed here
 static void reuse_timer_handler(void)
 {
 	int index;
@@ -62,6 +67,7 @@ static void reuse_timer_handler(void)
 			// put back route into another reuse list
 			index = get_reuse_list_index(info->figure_of_merit);
 			s_add_tail(&dcf.reuse_lists[index], n);
+			info->current_reuse_list = &(dcf.reuse_lists[index]);
 		}
 	}
 }
@@ -108,7 +114,7 @@ struct damping_config *new_damping_config(struct bgp_proto *p,
 	dcf.reuse_scale_factor = (double)(N_REUSE_LISTS / (max_ratio - 1));
 
 	for(i = 0; i < N_REUSE_LISTS; ++i) {
-		dcf.reuse_lists_index = (int)((dcf.half_time_unreachable / DELTA_T_REUSE) *
+		dcf.reuse_lists_index[i] = (int)((dcf.half_time_unreachable / DELTA_T_REUSE) *
 				log(1.0 / (dcf.reuse_threshold * (1 + (i / dcf.reuse_scale_factor)))
 					/ log(0.5)));
 	}
@@ -123,15 +129,15 @@ void damp_check(struct damping_config *dcf)
       // TODO: check parameters !
 }
 
-void damp_remove_route(rte *route)
+void damp_remove_route(struct bgp_proto *proto, rte *route)
 {
 	damping_info *info = route->attrs->damping;
-	struct bgp_conn *connection = info->bgp_connection;
+	struct bgp_conn *connection = proto->conn;
 	time_t t_diff;
 	int index;
 
 	if(info == NULL) {
-		// allocate damping struct
+		// XXX : allocate damping struct
 		info->figure_of_merit = 1;
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
@@ -151,7 +157,7 @@ void damp_remove_route(rte *route)
 		info->figure_of_merit = dcf.ceiling;
 
 	index = get_reuse_list_index(info->figure_of_merit);
-	if(info->current_reuse_list != NULL) {
+	if(!is_suppressed(info)) {
 		s_rem_node(&(info->reuse_list_node));
 		// if the route is not in a reuse list, it has not been suppressed yet,
 		// and it needs to be removed
@@ -164,6 +170,52 @@ void damp_remove_route(rte *route)
 	info->current_reuse_list = &(dcf.reuse_lists[index]);
 }
 
-void damp_add_route(rte *route)
+void damp_add_route(struct bgp_proto *proto, rte *route)
 {
+	damping_info *info = route->attrs->damping;
+	struct bgp_conn *connection = proto->conn;
+	time_t diff;
+	int index;
+
+	if(info == NULL) {
+		rte_update(connection->bgp->p.table,
+				route->net, &(connection->bgp->p),
+				&(connection->bgp->p), route);
+		return;
+	}
+
+	diff = now - info->last_time_updated;
+	index = diff / DELTA_T;
+	if(index >= dcf.decay_array_size)
+		info->figure_of_merit = 0;
+	else
+		info->figure_of_merit = get_new_figure_of_merit(info, now);
+
+	if(!is_suppressed(info) && info->figure_of_merit < dcf.cut_threshold) {
+		// rte not suppressed and acceptable penalty term -> use it
+		rte_update(connection->bgp->p.table,
+				route->net, &(connection->bgp->p),
+				&(connection->bgp->p), route);
+	} else if(is_suppressed(info) && info->figure_of_merit < dcf.reuse_threshold) {
+		rem_node(info);
+		info->current_reuse_list = NULL;
+		rte_update(connection->bgp->p.table,
+				route->net, &(connection->bgp->p),
+				&(connection->bgp->p), route);
+	} else {
+		index = get_reuse_list_index(info);
+		if(is_suppressed(info))
+			rem_node(info);
+
+		s_add_tail(&dcf.reuse_lists[index], info);
+		info->current_reuse_list = &dcf.reuse_lists[index];
+	}
+
+	if(info->figure_of_merit > 0) {
+		info->last_time_updated = now;
+	} else {
+		// ToDo : deallocate or recycle damping structure
+		route->attrs->damping = NULL;
+	}
 }
+

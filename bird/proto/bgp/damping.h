@@ -67,7 +67,7 @@ struct damping_config *new_damping_config(struct bgp_proto*, int cut_threshold,
 // Check damping configuration
 void damp_check(damping_config *);
 
-void damp_remove_route(struct rte*);
-void damp_add_route(struct rte*);
+void damp_remove_route(struct bgp_proto*, struct rte*);
+void damp_add_route(struct bgp_proto*, struct rte*);
 
 #endif /* _DAMPING_H_ */

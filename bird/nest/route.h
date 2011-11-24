@@ -275,7 +275,7 @@ struct mpnh {
 };
 
 #ifdef ROUTE_DAMPING
-struct damp_info;
+struct damping_info;
 #endif
 
 typedef struct rta {
@@ -298,7 +298,7 @@ typedef struct rta {
   struct ea_list *eattrs;		/* Extended Attribute chain */
 
 #ifdef ROUTE_DAMPING
-  struct damp_info *damping;
+  struct damping_info *damping;
 #endif
 } rta;
 
