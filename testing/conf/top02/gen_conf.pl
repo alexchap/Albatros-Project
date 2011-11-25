@@ -7,7 +7,7 @@ use warnings;
 print  "
 # BIRD configuration file for router A
 
-log \"/var/log/bird-top01-rta.log\" all;
+log \"/var/log/bird-top02-rta.log\" all;
 debug protocols all;
 
 router id 10.10.10.11;

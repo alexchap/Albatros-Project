@@ -1,0 +1,8 @@
+In each topology, we have the following scripts :
+
+- configure_interface.sh : configure your linux laptop & start daemons
+- reset.sh : reset to initial configuration
+- configuration files of bird daemons used (eg. rta.conf)
+- start_bird.sh : if your daemons are down, just start them again !
+- useful_commands.txt : what commands shall I use to see logs and debug msg ?
+- description.txt : description of the topology

@@ -1,6 +1,7 @@
 #ifndef _DAMPING_H_
 #define _DAMPING_H_
 
+
 #include "lib/timer.h"
 #include "lib/slists.h"
 
@@ -9,7 +10,7 @@
 
 // ToDo : better values?
 #define N_REUSE_LISTS 10
-#define DELTA_T_REUSE 5
+#define DELTA_T_REUSE 15
 
 struct protocol;
 struct slist;
@@ -57,21 +58,18 @@ typedef struct damping_info {
 /**
  * Computes all the necessary parameters and
  * allocate the necessary tables (decay tables)
- *
- * Note 1: may be necessary to add some arguments to this function,
- * since some of the configuration parameters are read from a
- * config file.
- * XXX : see compiler's warning. Incompatible pointer type in cf-parse.y
- * this may cause some undefined behaviour.
  */
 struct damping_config *new_damping_config(int cut_threshold,
                                    int reuse_threshold, int tmax_hold, 
 								   int half_time_reachable, int half_time_unreachable);
 
-// Check damping configuration
+/* Check damping configuration */
 void damp_check(damping_config *);
 
+/* Process unreachable messages (RFC §4.8.2) */
 void damp_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
+
+/* Process route advertisments (RFC §4.8.3) */
 void damp_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
 
 #endif /* _DAMPING_H_ */
