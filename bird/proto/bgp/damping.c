@@ -37,14 +37,13 @@ static int get_new_figure_of_merit(damping_info* info, bird_clock_t n)
 		return dcf.decay_array[i] * info->figure_of_merit;
 }
 
-// ToDo : ensure that no synchronization primitives are needed here
 static void reuse_timer_handler(struct timer* t)
 {
 	int index;
 	damping_info *info;
-	snode *n;
-
-	// reset timer
+	snode *n, *nxt;
+	rte *tmp_rte;
+	struct bgp_proto *p;
 
 	// XXX : probably not the best solution : make a shallow copy
 	// of the list's head so it can be re-initialized to an empty list
@@ -55,16 +54,19 @@ static void reuse_timer_handler(struct timer* t)
 
 	dcf.reuse_list_current_offset++;
 
-	WALK_SLIST(n, l) {
+	WALK_SLIST_DELSAFE(n, nxt, l) {
 		info = (damping_info*)n;
+		p = info->bgp_connection->bgp;
 
 		info->figure_of_merit = get_new_figure_of_merit(info, now);
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf.reuse_threshold) {
-			rte_update((info->bgp_connection->bgp)->p.table,
-					(info->route)->net, &(info->bgp_connection->bgp->p),
-					&(info->bgp_connection->bgp->p), info->route);
+			// ToDo : how to store rta's inside of damping_info in an efficient
+			// way????
+			// tmp_rte = rte_get_temp();
+			tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
+			rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
 		} else {
 			// put back route into another reuse list
 			index = get_reuse_list_index(info->figure_of_merit);
@@ -80,7 +82,6 @@ static void reuse_timer_handler(struct timer* t)
 	#define log_tmp log
 	#undef log
 #endif
-
 
 // Note : the reuse timer will need to be allocated later (init function?)
 struct damping_config *new_damping_config(
@@ -133,18 +134,19 @@ void damp_check(struct damping_config *dcf)
       // TODO: check parameters !
 }
 
-void damp_remove_route(struct bgp_proto *proto, rte *route)
+void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
-	damping_info *info = route->attrs->damping;
+	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
 	time_t t_diff;
 	int index;
 
-	if(info == NULL) {
-		// XXX : allocate damping struct
+	if(info->bgp_connection == NULL) {
+		info->bgp_connection = connection;
 		info->figure_of_merit = 1;
+		info->last_time_updated = now;
 		rte_update(connection->bgp->p.table,
-				route->net, &(connection->bgp->p),
+				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
 		return;
 	}
@@ -166,7 +168,7 @@ void damp_remove_route(struct bgp_proto *proto, rte *route)
 		// if the route is not in a reuse list, it has not been suppressed yet,
 		// and it needs to be removed
 		rte_update(connection->bgp->p.table,
-				route->net, &(connection->bgp->p),
+				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
 	}
 
@@ -174,9 +176,9 @@ void damp_remove_route(struct bgp_proto *proto, rte *route)
 	info->current_reuse_list = &(dcf.reuse_lists[index]);
 }
 
-void damp_add_route(struct bgp_proto *proto, rte *route)
+void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
-	damping_info *info = route->attrs->damping;
+	damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
 	time_t diff;
 	int index;
@@ -218,8 +220,8 @@ void damp_add_route(struct bgp_proto *proto, rte *route)
 	if(info->figure_of_merit > 0) {
 		info->last_time_updated = now;
 	} else {
-		// ToDo : deallocate or recycle damping structure
-		route->attrs->damping = NULL;
+		fib_delete(&proto->damping_info_fib, info);
+		// ToDo : need to de-allocate?
 	}
 }
 

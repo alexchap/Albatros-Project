@@ -274,10 +274,6 @@ struct mpnh {
   unsigned char weight;
 };
 
-#ifdef ROUTE_DAMPING
-struct damping_info;
-#endif
-
 typedef struct rta {
   struct rta *next, **pprev;		/* Hash chain */
   struct proto *proto;			/* Protocol instance that originally created the route */
@@ -297,9 +293,6 @@ typedef struct rta {
   struct mpnh *nexthops;		/* Next-hops for multipath routes */
   struct ea_list *eattrs;		/* Extended Attribute chain */
 
-#ifdef ROUTE_DAMPING
-  struct damping_info *damping;
-#endif
 } rta;
 
 #define RTS_DUMMY 0			/* Dummy route to be removed soon */

@@ -22,6 +22,10 @@
 
 #include "bgp.h"
 
+#ifdef ROUTE_DAMPING
+#include "damping.h"
+#endif
+
 static struct rate_limit rl_rcv_update,  rl_snd_update;
 
 /*
@@ -850,8 +854,13 @@ bgp_do_rx_update(struct bgp_conn *conn,
     {
       DECODE_PREFIX(withdrawn, withdrawn_len);
       DBG("Withdraw %I/%d\n", prefix, pxlen);
-      if (n = net_find(p->p.table, prefix, pxlen))
-	rte_update(p->p.table, n, &p->p, &p->p, NULL);
+      if (n = net_find(p->p.table, prefix, pxlen)) {
+#ifdef ROUTE_DAMPING
+		  damp_remove_route(p, n, &prefix, pxlen);
+#else
+		  rte_update(p->p.table, n, &p->p, &p->p, NULL);
+#endif
+	  }
     }
 
   if (!attr_len && !nlri_len)		/* shortcut */
@@ -875,7 +884,13 @@ bgp_do_rx_update(struct bgp_conn *conn,
 	  rte *e = rte_get_temp(rta_clone(a));
 	  e->net = net_get(p->p.table, prefix, pxlen);
 	  e->pflags = 0;
+
+#ifdef ROUTE_DAMPING
+	  damp_add_route(p, e, &prefix, pxlen);
+#else
 	  rte_update(p->p.table, e->net, &p->p, &p->p, e);
+#endif
+
 	}
       else
 	{

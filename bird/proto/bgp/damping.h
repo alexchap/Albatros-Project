@@ -13,8 +13,8 @@
 
 struct protocol;
 struct slist;
-struct rte;
 struct bgp_conn;
+struct net;
 
 /**
  * BGP damping config
@@ -48,8 +48,10 @@ typedef struct damping_info {
 	int figure_of_merit;
 	time_t last_time_updated;
 
-	struct rte* route;
 	struct bgp_conn* bgp_connection;
+
+	ip_addr prefix;
+	int pxlen;
 } damping_info;
 
 /**
@@ -69,7 +71,7 @@ struct damping_config *new_damping_config(int cut_threshold,
 // Check damping configuration
 void damp_check(damping_config *);
 
-void damp_remove_route(struct bgp_proto*, struct rte*);
-void damp_add_route(struct bgp_proto*, struct rte*);
+void damp_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
+void damp_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
 
 #endif /* _DAMPING_H_ */

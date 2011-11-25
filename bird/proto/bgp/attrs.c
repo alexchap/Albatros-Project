@@ -22,6 +22,24 @@
 
 #include "bgp.h"
 
+#ifdef ROUTE_DAMPING
+#include "damping.h"
+#endif
+
+#ifdef ROUTE_DAMPING
+
+static void
+damp_damping_info_init(struct fib_node *N)
+{
+	damping_info *info = (damping_info*)(N);
+
+	info->figure_of_merit = 0;
+	info->current_reuse_list = NULL;
+	info->bgp_connection = NULL;
+}
+
+#endif
+
 /*
  *   UPDATE message error handling
  *
@@ -1605,6 +1623,11 @@ bgp_attr_init(struct bgp_proto *p)
   init_list(&p->bucket_queue);
   p->withdraw_bucket = NULL;
   fib_init(&p->prefix_fib, p->p.pool, sizeof(struct bgp_prefix), 0, bgp_init_prefix);
+
+#ifdef ROUTE_DAMPING
+  fib_init(&p->damping_info_fib, p->p.pool, sizeof(damping_info),
+		  0, damp_damping_info_init);
+#endif
 }
 
 void

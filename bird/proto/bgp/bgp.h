@@ -123,6 +123,9 @@ struct bgp_proto {
   ip_addr local_link;			/* Link-level version of source_addr */
 #endif
 
+#ifdef ROUTE_DAMPING
+  struct fib damping_info_fib;
+#endif
 };
 
 struct bgp_prefix {
