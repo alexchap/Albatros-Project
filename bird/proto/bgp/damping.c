@@ -1,4 +1,5 @@
 #include <math.h>
+#include <assert.h>
 
 #include "nest/bird.h"
 
@@ -10,6 +11,12 @@
 // #define LOCAL_DEBUG 1
 
 damping_config dcf;
+
+static void damp_free_damping_info(damping_info *info)
+{
+	rta_free(info->attrs);
+	assert(info->current_reuse_list == NULL);
+}
 
 static inline int is_suppressed(damping_info *info)
 {
@@ -64,9 +71,7 @@ static void reuse_timer_handler(struct timer* t)
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf.reuse_threshold) {
-			// ToDo : how to store rta's inside of damping_info in an efficient
-			// way????
-			// tmp_rte = rte_get_temp();
+			tmp_rte = rte_get_temp(info->attrs);
 			tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
 			rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
 		} else {
@@ -100,7 +105,8 @@ struct damping_config *new_damping_config(
 	dcf.half_time_reachable = half_time_reachable;
 	dcf.half_time_unreachable = half_time_unreachable;
 
-        DBG("New damping_config, with parameters (%d,%d,%d,%d,%d)\n",cut_threshold,reuse_threshold,tmax_hold,half_time_reachable,half_time_unreachable);
+	DBG("New damping_config, with parameters (%d, %d, %d, %d, %d)\n", cut_threshold,
+			reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
 	dcf.ceiling = dcf.reuse_threshold * exp(dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0);
 
 	dcf.decay_array_size = dcf.tmax_hold / DELTA_T;
@@ -141,6 +147,7 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 {
 	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
+	struct rte *route;
 	time_t t_diff;
 	int index;
 
@@ -148,6 +155,18 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		info->bgp_connection = connection;
 		info->figure_of_merit = 1;
 		info->last_time_updated = now;
+		route = rte_find(n, proto);
+		info->attrs = rta_clone(route->attrs);
+		if(route == NULL) {
+			// ToDo
+			// not sure whether this can happen or not
+			// given that the route is being removed,
+			// it should exist and rte_find should normally
+			// not return NULL
+			assert(!"shoulnd't happen");
+		}
+		
+		// XXX : hope this will work!
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
@@ -223,8 +242,9 @@ void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxle
 	if(info->figure_of_merit > 0) {
 		info->last_time_updated = now;
 	} else {
+		damp_free_damping_info(info);
+		// Note : do fib_delete also de-allocate memory?
 		fib_delete(&proto->damping_info_fib, info);
-		// ToDo : need to de-allocate?
 	}
 }
 

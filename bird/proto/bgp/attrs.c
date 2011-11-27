@@ -36,6 +36,7 @@ damp_damping_info_init(struct fib_node *N)
 	info->figure_of_merit = 0;
 	info->current_reuse_list = NULL;
 	info->bgp_connection = NULL;
+	info->attrs = NULL;
 }
 
 #endif
