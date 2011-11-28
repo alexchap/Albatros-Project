@@ -53,6 +53,7 @@ typedef struct damping_info {
 
 	ip_addr prefix;
 	int pxlen;
+	struct rta *attrs;
 } damping_info;
 
 /**
