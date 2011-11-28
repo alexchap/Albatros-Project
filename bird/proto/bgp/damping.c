@@ -7,7 +7,7 @@
 #include "bgp.h"
 #include "damping.h"
 
-// #define LOCAL_DEBUG 1
+#define LOCAL_DEBUG 1
 
 damping_config dcf;
 
@@ -139,6 +139,9 @@ void damp_check(struct damping_config *dcf)
 
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
+	
+	DBG("BGP: remove route X (todo: change the X with the name of the route)\n");
+	
 	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
 	time_t t_diff;
@@ -181,6 +184,9 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 
 void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
+	
+	DBG("BGP: Adding a route.\n");
+
 	damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
 	time_t diff;
