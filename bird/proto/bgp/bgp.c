@@ -919,15 +919,22 @@ bgp_init(struct proto_config *C)
   p->rs_client = c->rs_client;
   p->rr_client = c->rr_client;
   p->igp_table = get_igp_table(c);
+#ifdef ROUTE_DAMPING
+  p->dcf = new_damping_config(c->cut_threshold,
+				  c->reuse_threshold,
+				  c->tmax_hold,
+				  c->half_time_reachable,
+				  c->half_time_unreachable);
 
-// XXX: problem, ceiling is not initialized for example !
-  DBG("BGP:Damping: Check damp config : %d,%d,%d,%d,%d,ceiling %d \n",c->dcf->cut_threshold,
-					c->dcf->reuse_threshold,
-					c->dcf->tmax_hold,
-					c->dcf->half_time_reachable,
-					c->dcf->half_time_unreachable,
-					c->dcf->ceiling);
-
+  DBG("BGP:Damping: Check damp config : %d :   %d,%d,%d,%d,%d,%d \n",
+					p->cf->damping,
+					p->dcf->cut_threshold,
+					p->dcf->reuse_threshold,
+					p->dcf->tmax_hold,
+					p->dcf->half_time_reachable,
+					p->dcf->half_time_unreachable,
+					p->dcf->ceiling);
+#endif
   return P;
 }
 
@@ -1028,7 +1035,7 @@ bgp_check(struct bgp_config *c)
 
 #ifdef ROUTE_DAMPING
   /* Check damping configuration */
-  damp_check(c->dcf);
+  damp_check(c->reuse_threshold,c->cut_threshold,c->tmax_hold,c->half_time_reachable,c->half_time_unreachable);
 #endif
 }
 

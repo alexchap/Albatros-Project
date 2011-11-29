@@ -16,10 +16,6 @@
 struct linpool;
 struct eattr;
 
-#ifdef ROUTE_DAMPING
-struct damping_config;
-#endif
-
 struct bgp_config {
   struct proto_config c;
   u32 local_as, remote_as;
@@ -57,7 +53,11 @@ struct bgp_config {
   char *password;			/* Password used for MD5 authentication */
   struct rtable_config *igp_table;	/* Table used for recursive next hop lookups */
   int damping;				/* Enable/Disable route damping */
-  struct damping_config *dcf;		/* Route flap damping configuration */
+  int reuse_threshold;			/* Damping parameters */
+  int cut_threshold;
+  int tmax_hold;
+  int half_time_reachable;
+  int half_time_unreachable;
 };
 
 #define MLL_SELF 1
@@ -124,6 +124,7 @@ struct bgp_proto {
 #endif
 
 #ifdef ROUTE_DAMPING
+  struct damping_config *dcf;		/* Route flap damping configuration */
   struct fib damping_info_fib;
 #endif
 };

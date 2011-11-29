@@ -108,7 +108,6 @@ struct damping_config *new_damping_config(
 
 	DBG("BGP:Damping : New damping_config, with parameters (%d, %d, %d, %d, %d)\n", cut_threshold,
 			reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
-	// XXX : with default params, ceiling = -2147483648 !! why ?
 	dcf.ceiling = (int) (dcf.reuse_threshold * exp((double)dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0));
 
 	dcf.decay_array_size = dcf.tmax_hold / DELTA_T;
@@ -140,10 +139,15 @@ struct damping_config *new_damping_config(
 }
 
 /* This function checks the damping parameters */
-void damp_check(struct damping_config *dcf)
+void damp_check(int reuse_threshold, int cut_threshold, int tmax_hold, int half_time_reachable, int half_time_unreachable)
 {
-      if(dcf->reuse_threshold >= dcf->cut_threshold)
+      if(reuse_threshold >= cut_threshold)
 	    cf_error("Reuse threshold must be smaller than the cut threshold");
+
+      int ceiling = (int) (reuse_threshold * exp((double)tmax_hold / half_time_unreachable) * log(2.0));
+      if(ceiling<=0)
+	    cf_error("Wrong parameters for damping, leading to a negative ceiling !");
+
 }
 
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
