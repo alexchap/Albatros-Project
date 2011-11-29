@@ -6,7 +6,7 @@
  *	Can be freely distributed and used under the terms of the GNU GPL.
  */
 
-#undef LOCAL_DEBUG
+#define LOCAL_DEBUG 1
 
 #include <stdlib.h>
 

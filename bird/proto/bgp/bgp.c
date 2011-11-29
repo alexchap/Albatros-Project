@@ -920,6 +920,14 @@ bgp_init(struct proto_config *C)
   p->rr_client = c->rr_client;
   p->igp_table = get_igp_table(c);
 
+// XXX: problem, ceiling is not initialized for example !
+  DBG("BGP:Damping: Check damp config : %d,%d,%d,%d,%d,ceiling %d \n",c->dcf->cut_threshold,
+					c->dcf->reuse_threshold,
+					c->dcf->tmax_hold,
+					c->dcf->half_time_reachable,
+					c->dcf->half_time_unreachable,
+					c->dcf->ceiling);
+
   return P;
 }
 

@@ -7,6 +7,7 @@
 
 #include "bgp.h"
 #include "damping.h"
+#include "conf/conf.h"
 
 #define LOCAL_DEBUG 1
 
@@ -105,9 +106,10 @@ struct damping_config *new_damping_config(
 	dcf.half_time_reachable = half_time_reachable;
 	dcf.half_time_unreachable = half_time_unreachable;
 
-	DBG("New damping_config, with parameters (%d, %d, %d, %d, %d)\n", cut_threshold,
+	DBG("BGP:Damping : New damping_config, with parameters (%d, %d, %d, %d, %d)\n", cut_threshold,
 			reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
-	dcf.ceiling = dcf.reuse_threshold * exp(dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0);
+	// XXX : with default params, ceiling = -2147483648 !! why ?
+	dcf.ceiling = (int) (dcf.reuse_threshold * exp((double)dcf.tmax_hold / dcf.half_time_unreachable) * log(2.0));
 
 	dcf.decay_array_size = dcf.tmax_hold / DELTA_T;
 	dcf.decay_array = cfg_alloc(dcf.decay_array_size * sizeof(double));
@@ -140,13 +142,12 @@ struct damping_config *new_damping_config(
 /* This function checks the damping parameters */
 void damp_check(struct damping_config *dcf)
 {
-      // TODO: check parameters !
+      if(dcf->reuse_threshold >= dcf->cut_threshold)
+	    cf_error("Reuse threshold must be smaller than the cut threshold");
 }
 
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
-	
-	DBG("BGP: remove route X (todo: change the X with the name of the route)\n");
 	
 	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
@@ -158,7 +159,7 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		info->bgp_connection = connection;
 		info->figure_of_merit = 1;
 		info->last_time_updated = now;
-		route = rte_find(n, proto);
+		route = rte_find(n, &proto->p);
 		info->attrs = rta_clone(route->attrs);
 		if(route == NULL) {
 			// ToDo
@@ -173,20 +174,23 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
+		DBG("BGP:Damping: New alloc for prefix %I/%d\n",addr,pxlen);
 		return;
 	}
 
 	t_diff = now - info->last_time_updated;
 	index = t_diff / DELTA_T;
 	if(index >= dcf.decay_array_size) {
+		DBG("BGP:Damping: Penalty reset for prefix %I/%d\n",addr,pxlen);
 		info->figure_of_merit = 1;
 		return;
 	}
 
 	info->figure_of_merit = get_new_figure_of_merit(info, now) +1;
-	if(info->figure_of_merit > dcf.ceiling)
+	if(info->figure_of_merit > dcf.ceiling) {
 		info->figure_of_merit = dcf.ceiling;
-
+		DBG("BGP:Damping: Max penalty for prefix %I/%d\n",addr,pxlen);
+        }
 	index = get_reuse_list_index(info->figure_of_merit);
 	if(!is_suppressed(info)) {
 		s_rem_node(&(info->reuse_list_node));
@@ -198,14 +202,13 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 	}
 
 	s_add_tail(&(dcf.reuse_lists[index]), &(info->reuse_list_node));
+	DBG("BGP:Damping: Prefix %I/%d added to reuse list\n",addr,pxlen);
 	info->current_reuse_list = &(dcf.reuse_lists[index]);
 }
 
 void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
 	
-	DBG("BGP: Adding a route.\n");
-
 	damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
 	struct bgp_conn *connection = proto->conn;
 	time_t diff;
@@ -220,19 +223,22 @@ void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxle
 
 	diff = now - info->last_time_updated;
 	index = diff / DELTA_T;
-	if(index >= dcf.decay_array_size)
+	if(index >= dcf.decay_array_size) {
+		DBG("BGP:Damping: Penalty reset for prefix %I/%d\n",addr,pxlen);
 		info->figure_of_merit = 0;
-	else
+	} else {
 		info->figure_of_merit = get_new_figure_of_merit(info, now);
-
+	}
 	if(!is_suppressed(info) && info->figure_of_merit < dcf.cut_threshold) {
 		// rte not suppressed and acceptable penalty term -> use it
+		DBG("BGP:Damping: Penalty OK for prefix %I/%d\n",addr,pxlen);
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
 	} else if(is_suppressed(info) && info->figure_of_merit < dcf.reuse_threshold) {
 		s_rem_node((snode*)info);
 		info->current_reuse_list = NULL;
+		DBG("BGP:Damping: Penalty OK for prefix %I/%d\n",addr,pxlen);
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
@@ -240,7 +246,7 @@ void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxle
 		index = get_reuse_list_index(info->figure_of_merit);
 		if(is_suppressed(info))
 			s_rem_node((snode*)info);
-
+		DBG("BGP:Damping: Penalty KO for prefix %I/%d. It will be suppressed.\n",addr,pxlen);
 		s_add_tail(&dcf.reuse_lists[index], (snode*)info);
 		info->current_reuse_list = &dcf.reuse_lists[index];
 	}
