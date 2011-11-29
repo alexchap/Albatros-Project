@@ -4,3 +4,5 @@ sudo birdc -s /usr/local/var/run/bird_rta.ctl
 Check the logs of the daemon
 tail -f /var/log/bird-top02-rta.log
 
+Check the debug messages of the daemons
+tail -f /var/log/bird-top02-rta.debug

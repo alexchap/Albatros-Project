@@ -48,11 +48,11 @@ protocol bgp {
 
    # Route damping configuration
    route damping;
-#   cut_threshold 2500;
-#   reuse_threshold 800;
-#   tmax_hold 900;
-#   half_time_reachable 900;
-#   half_time_unreachable 900;
+   cut_threshold 2500;
+   reuse_threshold 800;
+   tmax_hold 900;
+   half_time_reachable 900;
+   half_time_unreachable 900;
 
    gateway recursive;
 

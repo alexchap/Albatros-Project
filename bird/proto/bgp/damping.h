@@ -56,21 +56,20 @@ typedef struct damping_info {
 	struct rta *attrs;
 } damping_info;
 
-/**
- * Computes all the necessary parameters and
- * allocate the necessary tables (decay tables)
- */
-struct damping_config *new_damping_config(int cut_threshold,
-                                   int reuse_threshold, int tmax_hold, 
-								   int half_time_reachable, int half_time_unreachable);
+/* Alloc damping configuration with basic parameters */
+struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold, int tmax_hold, int half_time_reachable, int half_time_unreachable);
+
+/* Compute all remaining parameters for a damping configuration */
+void damping_config_init(struct damping_config * dcf);
 
 /* Check damping configuration */
-void damp_check(int reuse_threshold, int cut_threshold, int tmax_hold, int half_time_reachable, int half_time_unreachable);
+void damp_check(struct damping_config * dcf);
 
 /* Process unreachable messages (RFC §4.8.2) */
 void damp_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 
 /* Process route advertisments (RFC §4.8.3) */
 void damp_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
+
 
 #endif /* _DAMPING_H_ */
