@@ -54,8 +54,8 @@ static void reuse_timer_handler(struct timer* t)
 	rte *tmp_rte;
 	struct bgp_proto *p;
 
-	// XXX : probably not the best solution : make a shallow copy
-	// of the list's head so it can be re-initialized to an empty list
+	// make a copy of the list's head so that it can be reinitialized without
+	// losing all informations
 	slist l = dcf.reuse_lists[dcf.reuse_list_current_offset];
 	s_init_list(&dcf.reuse_lists[dcf.reuse_list_current_offset]);
 
@@ -71,6 +71,9 @@ static void reuse_timer_handler(struct timer* t)
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf.reuse_threshold) {
+			// Note : possible problems here 
+			//   -> net might not be found if it has been eliminated from the
+			//      proto's routing table.
 			tmp_rte = rte_get_temp(info->attrs);
 			tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
 			rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
