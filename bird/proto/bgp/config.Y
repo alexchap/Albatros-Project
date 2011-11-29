@@ -54,11 +54,7 @@ bgp_proto_start: proto_start BGP {
      BGP_CFG->interpret_communities = 1;
      BGP_CFG->default_local_pref = 100;
      BGP_CFG->damping = 0;
-     BGP_CFG->cut_threshold = 2000;
-     BGP_CFG->reuse_threshold = 750;
-     BGP_CFG->tmax_hold = 900;
-     BGP_CFG->half_time_reachable = 900;
-     BGP_CFG->half_time_unreachable = 900;
+     BGP_CFG->dcf = damping_config_new(750,2000,900,900,900);
  }
  ;
 
@@ -110,11 +106,11 @@ bgp_proto:
  | bgp_proto IGP TABLE rtable ';' { BGP_CFG->igp_table = $4; }
  | bgp_proto TTL SECURITY bool ';' { BGP_CFG->ttl_security = $4; }
  | bgp_proto ROUTE DAMPING bool ';' { BGP_CFG->damping = $4; }
- | bgp_proto REUSE_THRESHOLD expr ';' { BGP_CFG->reuse_threshold = $3;}
- | bgp_proto CUT_THRESHOLD expr ';' { BGP_CFG->cut_threshold = $3;}
- | bgp_proto HALF_TIME_REACHABLE expr ';' { BGP_CFG->half_time_reachable = $3;}
- | bgp_proto HALF_TIME_UNREACHABLE expr ';' { BGP_CFG->half_time_unreachable = $3;}
- | bgp_proto TMAX_HOLD expr ';' { BGP_CFG->tmax_hold = $3;}
+ | bgp_proto REUSE_THRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
+ | bgp_proto CUT_THRESHOLD expr ';' { BGP_CFG->dcf->cut_threshold = $3;}
+ | bgp_proto HALF_TIME_REACHABLE expr ';' { BGP_CFG->dcf->half_time_reachable = $3;}
+ | bgp_proto HALF_TIME_UNREACHABLE expr ';' { BGP_CFG->dcf->half_time_unreachable = $3;}
+ | bgp_proto TMAX_HOLD expr ';' { BGP_CFG->dcf->tmax_hold = $3;}
  ;
 
 CF_ADDTO(dynamic_attr, BGP_ORIGIN

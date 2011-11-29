@@ -53,11 +53,9 @@ struct bgp_config {
   char *password;			/* Password used for MD5 authentication */
   struct rtable_config *igp_table;	/* Table used for recursive next hop lookups */
   int damping;				/* Enable/Disable route damping */
-  int reuse_threshold;			/* Damping parameters */
-  int cut_threshold;
-  int tmax_hold;
-  int half_time_reachable;
-  int half_time_unreachable;
+#ifdef ROUTE_DAMPING
+  struct damping_config *dcf;		/* Route flap damping configuration */
+#endif
 };
 
 #define MLL_SELF 1
@@ -124,7 +122,6 @@ struct bgp_proto {
 #endif
 
 #ifdef ROUTE_DAMPING
-  struct damping_config *dcf;		/* Route flap damping configuration */
   struct fib damping_info_fib;
 #endif
 };

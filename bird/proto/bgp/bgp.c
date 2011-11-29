@@ -920,20 +920,19 @@ bgp_init(struct proto_config *C)
   p->rr_client = c->rr_client;
   p->igp_table = get_igp_table(c);
 #ifdef ROUTE_DAMPING
-  p->dcf = new_damping_config(c->cut_threshold,
-				  c->reuse_threshold,
-				  c->tmax_hold,
-				  c->half_time_reachable,
-				  c->half_time_unreachable);
 
-  DBG("BGP:Damping: Check damp config : %d :   %d,%d,%d,%d,%d,%d \n",
+  if(c->damping) {
+     damping_config_init(p->cf->dcf);
+
+     DBG("BGP:Damping: Check damp config : %d :   %d,%d,%d,%d,%d,%d \n",
 					p->cf->damping,
-					p->dcf->cut_threshold,
-					p->dcf->reuse_threshold,
-					p->dcf->tmax_hold,
-					p->dcf->half_time_reachable,
-					p->dcf->half_time_unreachable,
-					p->dcf->ceiling);
+					p->cf->dcf->cut_threshold,
+					p->cf->dcf->reuse_threshold,
+					p->cf->dcf->tmax_hold,
+					p->cf->dcf->half_time_reachable,
+					p->cf->dcf->half_time_unreachable,
+					p->cf->dcf->ceiling);
+  }
 #endif
   return P;
 }
@@ -1035,7 +1034,8 @@ bgp_check(struct bgp_config *c)
 
 #ifdef ROUTE_DAMPING
   /* Check damping configuration */
-  damp_check(c->reuse_threshold,c->cut_threshold,c->tmax_hold,c->half_time_reachable,c->half_time_unreachable);
+  if(c->damping)
+    damp_check(c->dcf);
 #endif
 }
 

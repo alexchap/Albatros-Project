@@ -6,3 +6,7 @@ Check the logs of the daemon
 tail -f /var/log/bird-top01-rta.log
 tail -f /var/log/bird-top01-rtb.log
 
+Check the debug messages of the daemons
+tail -f /var/log/bird-top01-rta.debug
+tail -f /var/log/bird-top01-rtb.debug
+

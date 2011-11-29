@@ -856,9 +856,13 @@ bgp_do_rx_update(struct bgp_conn *conn,
       DBG("Withdraw %I/%d\n", prefix, pxlen);
       if (n = net_find(p->p.table, prefix, pxlen)) {
 #ifdef ROUTE_DAMPING
-		  damp_remove_route(p, n, &prefix, pxlen);
+      if(p->cf->damping) {
+         damp_remove_route(p, n, &prefix, pxlen);
+      } else {
+         rte_update(p->p.table, n, &p->p, &p->p, NULL);
+      }
 #else
-		  rte_update(p->p.table, n, &p->p, &p->p, NULL);
+         rte_update(p->p.table, n, &p->p, &p->p, NULL);
 #endif
 	  }
     }
@@ -886,9 +890,13 @@ bgp_do_rx_update(struct bgp_conn *conn,
 	  e->pflags = 0;
 
 #ifdef ROUTE_DAMPING
-	  damp_add_route(p, e, &prefix, pxlen);
+    if (p->cf->damping){
+      damp_add_route(p, e, &prefix, pxlen);
+    } else {
+      rte_update(p->p.table, e->net, &p->p, &p->p, e);
+    }
 #else
-	  rte_update(p->p.table, e->net, &p->p, &p->p, e);
+     rte_update(p->p.table, e->net, &p->p, &p->p, e);
 #endif
 
 	}
