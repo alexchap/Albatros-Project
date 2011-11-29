@@ -1,0 +1,22 @@
+# Sample config for a simple topology
+
+# Prerequisites
+- Open Vpn (package openvpn)
+- vde_switch (package vde2)
+- iproute2 (normally included in linux distro)
+- mdfmt tool to replay packets (see directory tool)
+
+# Overview
+- one listening router, with route damping enabled
+- Many peers sending updates (via replay of BGP packets)
+ <rta>:10.10.10.11 <------> Many routers sending updates (see file ASIP)
+	AS 65011	    
+
+# Steps to follow
+
+Setup :
+- Make sure you have one file ASIP in the directory
+ (format : IP AS_NUMBER on each line)
+- run the script ./gen_conf.pl > rta.conf to generate the config for the router
+- run the script ./configure_interface.sh
+Reset : run the script ./reset.sh
