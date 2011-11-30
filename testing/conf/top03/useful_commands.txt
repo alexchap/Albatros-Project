@@ -10,3 +10,5 @@ Check the debug messages of the daemons
 tail -f /var/log/bird-top03-rta.debug
 tail -f /var/log/bird-top03-rtb.debug
 
+Generate some flapping behavior for one route
+./gen_flap.sh
