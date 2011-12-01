@@ -53,17 +53,10 @@ static void reuse_timer_handler(struct timer* t, struct damping_config *dcf)
 	rte *tmp_rte;
 	struct bgp_proto *p;
 
-<<<<<<< HEAD
 	// make a copy of the list's head so that it can be reinitialized without
 	// losing all informations
-	slist l = dcf.reuse_lists[dcf.reuse_list_current_offset];
-	s_init_list(&dcf.reuse_lists[dcf.reuse_list_current_offset]);
-=======
-	// XXX : probably not the best solution : make a shallow copy
-	// of the list's head so it can be re-initialized to an empty list
 	slist l = dcf->reuse_lists[dcf->reuse_list_current_offset];
 	s_init_list(&dcf->reuse_lists[dcf->reuse_list_current_offset]);
->>>>>>> 74ddd9bb14c4a26b937d96281739850fc908cf8b
 
 	tm_start(t, DELTA_T_REUSE);
 
