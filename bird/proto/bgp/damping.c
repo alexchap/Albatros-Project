@@ -1,15 +1,14 @@
+#define LOCAL_DEBUG 1
+
 #include <math.h>
 #include <assert.h>
 
 #include "nest/bird.h"
-
 #include "lib/timer.h"
-
 #include "bgp.h"
 #include "damping.h"
 #include "conf/conf.h"
 
-#define LOCAL_DEBUG 1
 
 
 static void damp_free_damping_info(damping_info *info)
@@ -164,6 +163,7 @@ void damp_check(struct damping_config * dcf)
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
 	
+	DBG("BGP:Damping: damp_remove_route for prefix %I/%d\n",addr,pxlen);
 	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
 	struct damping_config *dcf = proto->cf->dcf;
 	struct bgp_conn *connection = proto->conn;
@@ -183,14 +183,15 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 			// given that the route is being removed,
 			// it should exist and rte_find should normally
 			// not return NULL
+			DBG("BGP:Damping : problem with rte_find");
 			assert(!"shoulnd't happen");
 		}
+		DBG("BGP:Damping: New alloc for prefix %I/%d\n",addr,pxlen);
 		
 		// XXX : hope this will work!
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
-		DBG("BGP:Damping: New alloc for prefix %I/%d\n",addr,pxlen);
 		return;
 	}
 

@@ -857,6 +857,7 @@ bgp_do_rx_update(struct bgp_conn *conn,
       if (n = net_find(p->p.table, prefix, pxlen)) {
 #ifdef ROUTE_DAMPING
       if(p->cf->damping) {
+         DBG("BGP:Damping : Hook OK %I/%d\n", prefix, pxlen);
          damp_remove_route(p, n, &prefix, pxlen);
       } else {
          rte_update(p->p.table, n, &p->p, &p->p, NULL);
