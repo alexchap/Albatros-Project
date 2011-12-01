@@ -17,7 +17,7 @@ static void damp_free_damping_info(damping_info *info)
 
 static inline int is_suppressed(damping_info *info)
 {
-	return (info->current_reuse_list == NULL);
+	return (info->current_reuse_list != NULL);
 }
 
 static int get_reuse_list_index(int penalty,struct damping_config *dcf)
@@ -218,7 +218,6 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 
 void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
-	
 	damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
 	struct damping_config *dcf = proto->cf->dcf;
 	struct bgp_conn *connection = proto->conn;
