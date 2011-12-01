@@ -1,7 +1,7 @@
 #ifndef _DAMPING_H_
 #define _DAMPING_H_
 
-
+#include "nest/route.h"
 #include "lib/timer.h"
 #include "lib/slists.h"
 
@@ -43,6 +43,8 @@ typedef struct damping_config {
 } damping_config;
 
 typedef struct damping_info {
+	struct fib_node n;
+
 	snode reuse_list_node;
 	slist *current_reuse_list;
 
@@ -57,7 +59,8 @@ typedef struct damping_info {
 } damping_info;
 
 /* Alloc damping configuration with basic parameters */
-struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold, int tmax_hold, int half_time_reachable, int half_time_unreachable);
+struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
+		int tmax_hold, int half_time_reachable, int half_time_unreachable);
 
 /* Compute all remaining parameters for a damping configuration */
 void damping_config_init(struct damping_config * dcf);
