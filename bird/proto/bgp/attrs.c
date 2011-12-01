@@ -1626,6 +1626,7 @@ bgp_attr_init(struct bgp_proto *p)
   fib_init(&p->prefix_fib, p->p.pool, sizeof(struct bgp_prefix), 0, bgp_init_prefix);
 
 #ifdef ROUTE_DAMPING
+  DBG("BGP:Damping: Init damping info fib");
   fib_init(&p->damping_info_fib, p->p.pool, sizeof(damping_info),
 		  0, damp_damping_info_init);
 #endif

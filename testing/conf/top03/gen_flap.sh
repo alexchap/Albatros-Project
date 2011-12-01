@@ -3,7 +3,7 @@
 # This script generates a flapping behavior for one route
 
 # Parameters
-INTERVAL=10;
+INTERVAL=2;
 FROUTE="211.11.11.11/32" # Fake route that flaps
 TABLE="flap";
 

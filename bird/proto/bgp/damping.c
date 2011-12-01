@@ -157,7 +157,9 @@ void damp_check(struct damping_config * dcf)
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
 	DBG("BGP:Damping: damp_remove_route for prefix %I/%d\n",*addr,pxlen);
+	fib_check(&proto->damping_info_fib);
 	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
+	fib_check(&proto->damping_info_fib);
 	struct damping_config *dcf = proto->cf->dcf;
 	struct bgp_conn *connection = proto->conn;
 	struct rte *route;
@@ -185,6 +187,11 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
+		damping_info *i = fib_find(&proto->damping_info_fib, addr, pxlen);
+		assert(i == info);
+		assert(i->figure_of_merit == 1);
+		i = fib_get(&proto->damping_info_fib, addr, pxlen);
+		assert(i == info);
 		return;
 	}
 
@@ -218,7 +225,9 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 
 void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
+	fib_check(&proto->damping_info_fib);
 	damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
+	fib_check(&proto->damping_info_fib);
 	struct damping_config *dcf = proto->cf->dcf;
 	struct bgp_conn *connection = proto->conn;
 	time_t diff;
@@ -241,14 +250,14 @@ void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxle
 	}
 	if(!is_suppressed(info) && info->figure_of_merit < dcf->cut_threshold) {
 		// rte not suppressed and acceptable penalty term -> use it
-		DBG("BGP:Damping: Penalty OK for prefix %I/%d\n",*addr,pxlen);
+		DBG("BGP:Damping: Penalty OK (%d/%d) for prefix %I/%d\n",info->figure_of_merit,dcf->cut_threshold,*addr,pxlen);
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
 	} else if(is_suppressed(info) && info->figure_of_merit < dcf->reuse_threshold) {
 		s_rem_node(&info->reuse_list_node);
 		info->current_reuse_list = NULL;
-		DBG("BGP:Damping: Penalty OK for prefix %I/%d\n",*addr,pxlen);
+		DBG("BGP:Damping: Penalty OK (%d/%d) for prefix %I/%d\n",info->figure_of_merit,dcf->cut_threshold,*addr,pxlen);
 		rte_update(connection->bgp->p.table,
 				route->net, &(connection->bgp->p),
 				&(connection->bgp->p), route);
