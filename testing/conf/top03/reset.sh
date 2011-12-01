@@ -17,3 +17,6 @@ sudo rm /var/log/bird-top03-rta.log
 sudo rm /var/log/bird-top03-rtb.log
 sudo rm /var/log/bird-top03-rta.debug
 sudo rm /var/log/bird-top03-rtb.debug
+
+echo "Flushing flap table"
+sudo ip ro flush ta flap
