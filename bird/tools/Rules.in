@@ -21,7 +21,6 @@ clean-dirs:=$(all-dirs) proto sysdep
 
 CPPFLAGS=-I$(root-rel) -I$(srcdir) @CPPFLAGS@
 CFLAGS=$(CPPFLAGS) @CFLAGS@
-CFLAGS+="-g"
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 CLIENT_LIBS=@CLIENT_LIBS@
@@ -69,15 +68,15 @@ subdir: all.o
 all.o: $(objs)
 #       $(LD) -r -o $@ $^
 #	Changed to $(CC) because $(LD) has problems with crosscompiling
-	$(CC) -nostdlib -r -o $@ $^
+	$(CC) -nostdlib -g -r -o $@ $^
 
 endif
 
 %.o: $(src-path)%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -g -o $@ -c $<
 
 depend:
-	$(CC) $(CPPFLAGS) -MM $(addprefix $(src-path),$(source)) >depend
+	$(CC) $(CPPFLAGS) -g -MM $(addprefix $(src-path),$(source)) >depend
 
 ifneq ($(wildcard depend),)
 include depend
