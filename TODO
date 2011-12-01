@@ -1,13 +1,27 @@
 TODO project albatros
 
-Status : 24th November 2011
+Status : 30th November 2011
 
-- Hoook updates/withdrawals in bgp.c (ref: from §4.8.4... RFC)
-  ->> check variable damping. Damping can be configured, but disabled !
-- Debugging messages for route damping
-- Create a function show damped routes & enable it from birdc interface
-- Add CLI messages to config file parser (config.Y)
-- Comment code ! (references to RFC etc.)
-- FIX problem when no damping -> can we define a conditional grammar in config.Y ?
+Priorities
+
+- ALL : Debug code written so far
+- damping :  Create a function show damped routes & enable it from birdc interface
+  -> use cli_msg (see bgp.c and ospf.c for example of use)
+  -> Add CLI messages to config file parser (config.Y)
+- damping : Create a flap statistics struct
+  -> we need statistics about flapping routes
+- damping : Comment code ! (references to RFC etc.)
+- damping_config_init : Start timer for reuse lists 
+- Testing : can we accept routes even if they are unreachable ?
+
+Not too urgent
+
+- Documentation
+- Test it on real scale
+- Separate the cases when routes are UNreachable or reachable 
+  -> we need more arrays in the damping_config
+- BASIC and important: do damping only for E-BGP peers
+  -> error msg vs. disable damping
+- FIX compilation problem when no damping -> can we define a conditional grammar in config.Y ?
   i.e if route damping is disabled, no need to create damping_config !
-- Overall : Fix compilation problem if damping disabled
+  same question for including dampin.c in the makefile -> conditional ?
