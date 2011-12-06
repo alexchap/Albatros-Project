@@ -136,6 +136,7 @@ void damping_config_init(struct damping_config *dcf) {
 		dcf->reuse_lists_index[i] = (int)((dcf->half_time_unreachable / DELTA_T_REUSE) *
 				log(1.0 / (dcf->reuse_threshold * (1 + (i / dcf->reuse_scale_factor)))
 					/ log(0.5)));
+		s_init_list(dcf->reuse_lists + i);
 	}
 
 	dcf->reuse_list_current_offset = 0;
@@ -192,35 +193,36 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		assert(i->figure_of_merit == 1);
 		i = fib_get(&proto->damping_info_fib, addr, pxlen);
 		assert(i == info);
+		DBG("returning from damp_remove_route");
 		return;
 	}
 
 	t_diff = now - info->last_time_updated;
 	index = t_diff / DELTA_T;
 	if(index >= dcf->decay_array_size) {
-		DBG("BGP:Damping: Penalty reset for prefix %I/%d\n",*addr,pxlen);
+		DBG("BGP:Damping: Penalty reset for prefix %I/%d\n", *addr, pxlen);
 		info->figure_of_merit = 1;
-		return;
+	} else {
+		info->figure_of_merit = get_new_figure_of_merit(info, now,dcf) +1;
+		if(info->figure_of_merit > dcf->ceiling) {
+			info->figure_of_merit = dcf->ceiling;
+			DBG("BGP:Damping: Max penalty for prefix %I/%d\n", *addr, pxlen);
+		}
 	}
 
-	info->figure_of_merit = get_new_figure_of_merit(info, now,dcf) +1;
-	if(info->figure_of_merit > dcf->ceiling) {
-		info->figure_of_merit = dcf->ceiling;
-		DBG("BGP:Damping: Max penalty for prefix %I/%d\n",*addr,pxlen);
-        }
-	index = get_reuse_list_index(info->figure_of_merit,dcf);
-	if(!is_suppressed(info)) {
+	index = get_reuse_list_index(info->figure_of_merit, dcf);
+	if(is_suppressed(info)) {
 		s_rem_node(&info->reuse_list_node);
-		// if the route is not in a reuse list, it has not been suppressed yet,
-		// and it needs to be removed
+	} else {
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
 	}
 
+	DBG("BGP:Damping: Prefix %I/%d added to reuse list\n", *addr, pxlen);
 	s_add_tail(&(dcf->reuse_lists[index]), &info->reuse_list_node);
-	DBG("BGP:Damping: Prefix %I/%d added to reuse list\n",*addr,pxlen);
 	info->current_reuse_list = &(dcf->reuse_lists[index]);
+	info->last_time_updated  = now;
 }
 
 void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
