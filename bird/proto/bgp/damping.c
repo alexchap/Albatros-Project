@@ -3,6 +3,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include <stdio.h>
+
 #include "nest/bird.h"
 #include "lib/timer.h"
 #include "bgp.h"
@@ -32,21 +34,16 @@ static int get_reuse_list_index(int penalty,struct damping_config *dcf)
 	return index;
 }
 
-static int get_new_figure_of_merit(damping_info* info, bird_clock_t n, struct damping_config *dcf)
+static int get_new_figure_of_merit(damping_info* info,
+		bird_clock_t n, struct damping_config *dcf)
 {
 	time_t diff = n - info->last_time_updated;
 	int i = diff / DELTA_T;
 
 	if(i >= dcf->decay_array_size) {
-		DBG("BGP:Damping: New figure of merit : 0 (index too big)\n");
 		return 0;
 	} else {
-		DBG("BGP:Damping: New figure of merit (diff : %d, old fig. : %d, "  \
-				"dec. : %d) = %d\n",
-				diff, info->figure_of_merit,
-				dcf->decay_array[i],
-				dcf->decay_array[i] * info->figure_of_merit);
-		return dcf->decay_array[i] * info->figure_of_merit;
+		return (int)(dcf->decay_array[i] * (double)info->figure_of_merit);
 	}
 }
 
@@ -97,20 +94,20 @@ static void reuse_timer_handler(struct timer* t, struct damping_config *dcf)
 	#undef log
 #endif
 
-struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,int tmax_hold,int half_time_reachable,int half_time_unreachable)
+struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
+		int tmax_hold, int half_time_reachable, int half_time_unreachable)
 {
 	struct damping_config * dcf = cfg_alloc(sizeof(damping_config)); 
-	dcf->cut_threshold = cut_threshold;
-	dcf->reuse_threshold = reuse_threshold;
-	dcf->tmax_hold = tmax_hold;
-	dcf->half_time_reachable = half_time_reachable;
-	dcf->half_time_unreachable = half_time_unreachable;
+	dcf->cut_threshold          = DEFAULT_CUT_THRESHOLD; // cut_threshold;
+	dcf->reuse_threshold        = DEFAULT_REUSE_THRESHOLD; //reuse_threshold;
+	dcf->tmax_hold              = tmax_hold;
+	dcf->half_time_reachable    = half_time_reachable;
+	dcf->half_time_unreachable  = half_time_unreachable;
 
-	DBG("BGP:Damping : New damping_config, with parameters (%d, %d, %d, %d, %d)\n", cut_threshold,
-			reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
-
+	DBG("BGP:Damping : New damping_config, with parameters (%d, %d, %d, %d, %d)\n",
+			cut_threshold, reuse_threshold, tmax_hold,
+			half_time_reachable, half_time_unreachable);
 	return dcf;
-
 }
 
 // Note : the reuse timer will need to be allocated later (init function?)
@@ -153,31 +150,30 @@ void damping_config_init(struct damping_config *dcf) {
 /* This function checks the damping parameters */
 void damp_check(struct damping_config * dcf)
 {
-      if(dcf->reuse_threshold >= dcf->cut_threshold)
-	    cf_error("Reuse threshold must be smaller than the cut threshold");
+	if(dcf->reuse_threshold >= dcf->cut_threshold)
+		cf_error("Reuse threshold must be smaller than the cut threshold");
 
-      int ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
-      if(ceiling<=0)
-	    cf_error("Wrong parameters for damping, leading to a negative ceiling !");
-
+	int ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
+	if(ceiling <= 0)
+		cf_error("Wrong parameters for damping, leading to a negative ceiling !");
 }
 
 void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
 	DBG("BGP:Damping: damp_remove_route for prefix %I/%d\n",*addr,pxlen);
-	damping_info *info = fib_get(&proto->damping_info_fib, addr, pxlen);
-	struct damping_config *dcf = proto->cf->dcf;
+	damping_info *info          = fib_get(&proto->damping_info_fib, addr, pxlen);
+	struct damping_config *dcf  = proto->cf->dcf;
 	struct bgp_conn *connection = proto->conn;
 	struct rte *route;
 	time_t t_diff;
 	int index;
 
 	if(info->bgp_connection == NULL) {
-		info->bgp_connection = connection;
-		info->figure_of_merit = 1;
+		info->bgp_connection    = connection;
+		info->figure_of_merit   = DEFAULT_FIGURE_OF_MERIT;
 		info->last_time_updated = now;
-		route = rte_find(n, &proto->p);
-		info->attrs = rta_clone(route->attrs);
+		route                   = rte_find(n, &proto->p);
+		info->attrs             = rta_clone(route->attrs);
 		if(route == NULL) {
 			// ToDo
 			// not sure whether this can happen or not
@@ -193,24 +189,18 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
-		damping_info *i = fib_find(&proto->damping_info_fib, addr, pxlen);
-		assert(i == info);
-		assert(i->figure_of_merit == 1);
-		i = fib_get(&proto->damping_info_fib, addr, pxlen);
-		assert(i == info);
-		DBG("returning from damp_remove_route");
 		return;
 	}
 
 	t_diff = now - info->last_time_updated;
-	index = t_diff / DELTA_T;
+	index  = t_diff / DELTA_T;
 	if(index >= dcf->decay_array_size) {
 		DBG("BGP:Damping: Penalty reset for prefix %I/%d\n", *addr, pxlen);
-		info->figure_of_merit = 1;
+		info->figure_of_merit = DEFAULT_FIGURE_OF_MERIT;
 	} else {
-		info->figure_of_merit = get_new_figure_of_merit(info, now,dcf) +1;
+		info->figure_of_merit = get_new_figure_of_merit(info, now,dcf) + DEFAULT_FIGURE_OF_MERIT;
 		DBG("New figure of merit for %I/%d\n : %d", *addr,
-													pxlen, info->figure_of_merit);
+				pxlen, info->figure_of_merit);
 		if(info->figure_of_merit > dcf->ceiling) {
 			info->figure_of_merit = dcf->ceiling;
 			DBG("BGP:Damping: Max penalty for prefix %I/%d\n", *addr, pxlen);

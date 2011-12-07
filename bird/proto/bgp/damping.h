@@ -12,6 +12,10 @@
 #define N_REUSE_LISTS 10
 #define DELTA_T_REUSE 15
 
+#define DEFAULT_CUT_THRESHOLD   1500
+#define DEFAULT_REUSE_THRESHOLD 750 
+#define DEFAULT_FIGURE_OF_MERIT 1000
+
 struct protocol;
 struct slist;
 struct bgp_conn;
@@ -73,6 +77,5 @@ void damp_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 
 /* Process route advertisments (RFC §4.8.3) */
 void damp_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
-
 
 #endif /* _DAMPING_H_ */
