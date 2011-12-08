@@ -170,6 +170,7 @@ static int get_new_figure_of_merit(damping_info* info,
 
 void damping_reuse_timer_handler(struct timer* t)
 {
+       DBG("BGP:Damping : Bob l'éponge\n");
 	damping_config *dcf = (damping_config*)t->data;
 	int index;
 	damping_info *info;
