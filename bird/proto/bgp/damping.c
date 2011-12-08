@@ -170,6 +170,7 @@ static int get_new_figure_of_merit(damping_info* info,
 
 void damping_reuse_timer_handler(struct timer* t)
 {
+       DBG("BGP:Damping : Bob l'éponge\n");
 	damping_config *dcf = (damping_config*)t->data;
 	int index;
 	damping_info *info;
@@ -183,14 +184,20 @@ void damping_reuse_timer_handler(struct timer* t)
 	s_init_list(&dcf->reuse_lists[dcf->reuse_list_current_offset]);
 
 	tm_start(t, DELTA_T_REUSE);
+	if(dcf->reuse_list_current_offset== N_REUSE_LISTS-1){
+           dcf->reuse_list_current_offset=0;
+	} else {
+    	   dcf->reuse_list_current_offset++;
+	}
 
-	dcf->reuse_list_current_offset++;
 
 	WALK_SLIST_DELSAFE(n, nxt, l) {
 		info = GET_DAMPING_FROM_NODE(n);
+		DBG("Penalty found %d\n", info->figure_of_merit);
 		p = info->bgp_connection->bgp;
 
 		info->figure_of_merit = get_new_figure_of_merit(info, now,dcf);
+		DBG("New penalty set : %d\n", info->figure_of_merit);
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf->reuse_threshold) {
