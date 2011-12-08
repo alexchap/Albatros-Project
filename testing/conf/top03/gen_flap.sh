@@ -4,7 +4,7 @@
 
 # Parameters
 INTERVAL=2;
-FROUTE="211.11.11.11/32" # Fake route that flaps
+FROUTE="211.11.11.12/32" # Fake route that flaps
 TABLE="flap";
 
 # GET the default gateway

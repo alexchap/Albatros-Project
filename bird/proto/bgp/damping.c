@@ -207,7 +207,7 @@ void damping_reuse_timer_handler(struct timer* t)
   WALK_SLIST_DELSAFE(n, nxt, l)
   {
     info = GET_DAMPING_FROM_NODE(n);
-    DBG("BGP:Damping: Penalty found (%d) and decayed to ", info->figure_of_merit);
+    DBG("BGP:Damping: Penalty found for route %I/%d (%d) and decayed to ", info->prefix, info->pxlen, info->figure_of_merit);
     p = info->bgp_connection->bgp;
 
     info->figure_of_merit = get_new_figure_of_merit(info, now,dcf);
@@ -301,7 +301,7 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
 /* RFC 2439 §4.8.3 */
 void damping_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxlen)
 {
-  DBG("BGP:Damping: damping_add__route for prefix %I/%d\n",*addr,pxlen);
+  DBG("BGP:Damping: damping_add_route for prefix %I/%d\n",*addr,pxlen);
   damping_info *info = fib_find(&proto->damping_info_fib, addr, pxlen);
   damping_config *dcf = proto->cf->dcf;
   struct bgp_conn *connection = proto->conn;
@@ -350,7 +350,7 @@ void damping_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int p
       DBG("BGP:Damping: Penalty OK (%d/%d) for supressed route with prefix %I/%d\n",
           info->figure_of_merit,
           dcf->cut_threshold,
-          addr, pxlen);
+          *addr, pxlen);
       rte_update(connection->bgp->p.table,
                  route->net, &(connection->bgp->p),
                  &(connection->bgp->p), route);
