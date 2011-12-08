@@ -74,7 +74,7 @@ void damp_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
 #define DEFAULT_REUSE_THRESHOLD		750 
 #define DEFAULT_HALF_TIME_REACHABLE	900
 #define DEFAULT_HALF_TIME_UNREACHABLE	900
-#define DEFAULT_TMAX_HOLD		900
+#define DEFAULT_TMAX_HOLD		3000
 
 /* Other parameters */
 #define N_REUSE_LISTS			10	/* Number of reuse lists */

@@ -84,7 +84,7 @@ void damping_config_init(struct damping_config *dcf) {
 
 	int i;
 	double max_ratio, t;
-	dcf->ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
+	dcf->ceiling = (int) ((double)dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
 
 	dcf->decay_array_size = dcf->tmax_hold / DELTA_T;
 	dcf->decay_array = cfg_alloc(dcf->decay_array_size * sizeof(double));
@@ -126,6 +126,8 @@ void damping_config_check(struct damping_config * dcf)
 	int ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
 	if(ceiling <= 0)
 		cf_error("Wrong parameters for damping, leading to a negative ceiling !");
+	if(ceiling <= dcf->cut_threshold)
+	        cf_error("Error, the cut threshold must be smaller than the ceiling %d",ceiling);
 }
 static void damp_free_damping_info(damping_info *info)
 {
