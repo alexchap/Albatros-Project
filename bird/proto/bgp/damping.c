@@ -168,7 +168,7 @@ static int get_new_figure_of_merit(damping_info* info,
 #define GET_DAMPING_FROM_NODE(l) \
 	(damping_info*)((char*)l - (unsigned long)(&((damping_info*)(NULL))->reuse_list_node))
 
-static void reuse_timer_handler(struct timer* t)
+void damping_reuse_timer_handler(struct timer* t)
 {
 	damping_config *dcf = (damping_config*)t->data;
 	int index;

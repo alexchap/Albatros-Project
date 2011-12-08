@@ -529,6 +529,8 @@ bgp_setup_conn(struct bgp_proto *p, struct bgp_conn *conn)
  if(p->reuse_list_timer != NULL)
    {
     p->reuse_list_timer = tm_new(p->p.pool);
+	p->reuse_list_timer->data = p->cf->dcf;
+	p->reuse_list_timer->hook = damping_reuse_timer_handler;
     tm_start(p->reuse_list_timer, DELTA_T_REUSE);
    }
 #endif
