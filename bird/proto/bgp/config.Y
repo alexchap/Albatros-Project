@@ -54,7 +54,8 @@ bgp_proto_start: proto_start BGP {
      BGP_CFG->interpret_communities = 1;
      BGP_CFG->default_local_pref = 100;
      BGP_CFG->damping = 0;
-     BGP_CFG->dcf = damping_config_new(750,2000,900,900,900);
+     BGP_CFG->dcf = damping_config_new(DEFAULT_REUSE_THRESHOLD, DEFAULT_CUT_THRESHOLD,
+	DEFAULT_TMAX_HOLD, DEFAULT_HALF_TIME_REACHABLE,DEFAULT_HALF_TIME_UNREACHABLE);
  }
  ;
 

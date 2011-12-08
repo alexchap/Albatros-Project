@@ -98,15 +98,15 @@ struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold
 		int tmax_hold, int half_time_reachable, int half_time_unreachable)
 {
 	struct damping_config * dcf = cfg_alloc(sizeof(damping_config)); 
-	dcf->cut_threshold          = DEFAULT_CUT_THRESHOLD; // cut_threshold;
-	dcf->reuse_threshold        = DEFAULT_REUSE_THRESHOLD; //reuse_threshold;
+	dcf->cut_threshold          = cut_threshold;
+	dcf->reuse_threshold        = reuse_threshold;
 	dcf->tmax_hold              = tmax_hold;
 	dcf->half_time_reachable    = half_time_reachable;
 	dcf->half_time_unreachable  = half_time_unreachable;
 
-	DBG("BGP:Damping : New damping_config, with parameters (%d, %d, %d, %d, %d)\n",
-			cut_threshold, reuse_threshold, tmax_hold,
-			half_time_reachable, half_time_unreachable);
+	DBG("BGP:Damping : New damping_config, with parameters (cut_threshold %d, reuse_threshold %d,"
+		"tmax_hold %d, half_time_reachable %d, half_time_unreachable %d)\n",
+		cut_threshold, reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
 	return dcf;
 }
 
@@ -144,6 +144,8 @@ void damping_config_init(struct damping_config *dcf) {
 	}
 
 	dcf->reuse_list_current_offset = 0;
+	DBG("BGP:Damping: Runtime parameters computed : ceiling %d, decay_array size %d, max_ratio %lf\n",
+		dcf->ceiling, dcf->decay_array_size, max_ratio);
 	return;
 }
 
@@ -199,7 +201,7 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		info->figure_of_merit = DEFAULT_FIGURE_OF_MERIT;
 	} else {
 		info->figure_of_merit = get_new_figure_of_merit(info, now,dcf) + DEFAULT_FIGURE_OF_MERIT;
-		DBG("New figure of merit for %I/%d\n : %d", *addr,
+		DBG("New figure of merit for %I/%d\n : %d\n", *addr,
 				pxlen, info->figure_of_merit);
 		if(info->figure_of_merit > dcf->ceiling) {
 			info->figure_of_merit = dcf->ceiling;
