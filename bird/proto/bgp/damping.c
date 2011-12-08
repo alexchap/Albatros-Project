@@ -110,8 +110,8 @@ void damping_config_init(struct damping_config *dcf) {
 					/ log(0.5)));
 		s_init_list(dcf->reuse_lists + i);
 	}
-
 	dcf->reuse_list_current_offset = 0;
+	
 	DBG("BGP:Damping: Runtime parameters computed : ceiling %d, decay_array size %d, max_ratio %lf\n",
 		dcf->ceiling, dcf->decay_array_size, max_ratio);
 	return;
@@ -168,7 +168,7 @@ static int get_new_figure_of_merit(damping_info* info,
 #define GET_DAMPING_FROM_NODE(l) \
 	(damping_info*)((char*)l - (unsigned long)(&((damping_info*)(NULL))->reuse_list_node))
 
-static void reuse_timer_handler(struct timer* t, struct damping_config *dcf)
+void reuse_timer_handler(struct timer* t, struct damping_config *dcf)
 {
 	int index;
 	damping_info *info;

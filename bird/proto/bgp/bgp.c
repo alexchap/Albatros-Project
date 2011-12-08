@@ -524,6 +524,14 @@ bgp_setup_conn(struct bgp_proto *p, struct bgp_conn *conn)
   conn->tx_ev = ev_new(p->p.pool);
   conn->tx_ev->hook = bgp_kick_tx;
   conn->tx_ev->data = conn;
+
+#ifdef ROUTE_DAMPING
+ if(p->reuse_list_timer != NULL)
+   {
+    p->reuse_list_timer = tm_new(p->p.pool);
+    tm_start(p->reuse_list_timer, DELTA_T_REUSE);
+   }
+#endif
 }
 
 static void

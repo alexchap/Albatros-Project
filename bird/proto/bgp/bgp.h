@@ -122,6 +122,7 @@ struct bgp_proto {
 #endif
 
 #ifdef ROUTE_DAMPING
+  timer *reuse_list_timer;		/* The timer for the reuse lists */ 
   struct fib damping_info_fib;		/* Fib storing flap information for all prefixes */
 #endif
 };

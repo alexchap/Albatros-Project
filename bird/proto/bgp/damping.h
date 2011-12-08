@@ -40,7 +40,6 @@ typedef struct damping_config {
 	int* reuse_lists_index;		/* The indexes of reuse lists */
 	struct slist *reuse_lists;	/* The reuse lists */
 
-	timer *reuse_list_timer;	/* The timer for the reuse lists */
 } damping_config;
 
 /* Per route structure */
