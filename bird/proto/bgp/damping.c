@@ -198,7 +198,6 @@ void damping_reuse_timer_handler(struct timer* t)
 			tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
 			rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
 		} else {
-			// put back route into another reuse list
 			index = get_reuse_list_index(info->figure_of_merit,dcf);
 			s_add_tail(&dcf->reuse_lists[index], &info->reuse_list_node);
 			info->current_reuse_list = &(dcf->reuse_lists[index]);
