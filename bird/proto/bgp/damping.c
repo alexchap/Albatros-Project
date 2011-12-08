@@ -50,8 +50,9 @@ static int get_new_figure_of_merit(damping_info* info,
 #define GET_DAMPING_FROM_NODE(l) \
 	(damping_info*)((char*)l - (unsigned long)(&((damping_info*)(NULL))->reuse_list_node))
 
-static void reuse_timer_handler(struct timer* t, struct damping_config *dcf)
+static void reuse_timer_handler(struct timer* t)
 {
+	damping_config *dcf = (damping_config*)t->data;
 	int index;
 	damping_info *info;
 	snode *n, *nxt;
@@ -112,8 +113,8 @@ struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold
 
 // Note : the reuse timer will need to be allocated later (init function?)
 // All other parameters, once we know the basic parameters
-void damping_config_init(struct damping_config *dcf) {
-
+void damping_config_init(struct damping_config *dcf)
+{
 	int i;
 	double max_ratio, t;
 	dcf->ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
@@ -174,18 +175,8 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		info->last_time_updated = now;
 		route                   = rte_find(n, &proto->p);
 		info->attrs             = rta_clone(route->attrs);
-		if(route == NULL) {
-			// ToDo
-			// not sure whether this can happen or not
-			// given that the route is being removed,
-			// it should exist and rte_find should normally
-			// not return NULL
-			DBG("BGP:Damping : problem with rte_find");
-			assert(!"shoulnd't happen");
-		}
+		assert(route != NULL);
 		DBG("BGP:Damping: New alloc for prefix %I/%d\n",*addr,pxlen);
-		
-		// XXX : hope this will work!
 		rte_update(connection->bgp->p.table,
 				n, &(connection->bgp->p),
 				&(connection->bgp->p), NULL);
@@ -283,7 +274,7 @@ void damp_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int pxle
 
 	if(info->figure_of_merit > 0) {
 		info->last_time_updated = now;
-	} else {
+	} else if(info->figure_of_merit < dcf->reuse_threshold / 2.0) {
 		assert(info->current_reuse_list == NULL);
 		DBG("BGP:Damping: Route %I/%d penalty has reached 0\n", *addr, pxlen);
 		damp_free_damping_info(info);

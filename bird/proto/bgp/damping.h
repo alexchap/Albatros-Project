@@ -42,8 +42,6 @@ typedef struct damping_config {
 	int reuse_list_current_offset;
 	int* reuse_lists_index;
 	struct slist *reuse_lists;
-
-	timer *reuse_list_timer;
 } damping_config;
 
 typedef struct damping_info {
@@ -61,6 +59,8 @@ typedef struct damping_info {
 	int pxlen;
 	struct rta *attrs;
 } damping_info;
+
+void damping_reuse_timer_handler(struct timer*);
 
 /* Alloc damping configuration with basic parameters */
 struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
