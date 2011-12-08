@@ -201,7 +201,7 @@ void damping_reuse_timer_handler(struct timer* t)
 		info->last_time_updated = now;
 
 		if(info->figure_of_merit < dcf->reuse_threshold) {
-			tmp_rte = rte_get_temp(info->attrs);
+			tmp_rte      = rte_get_temp(info->attrs);
 			tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
 			rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
 		} else {
@@ -226,6 +226,8 @@ void damp_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen
 		info->bgp_connection    = connection;
 		info->figure_of_merit   = DEFAULT_FIGURE_OF_MERIT;
 		info->last_time_updated = now;
+		info->prefix            = *addr;
+		info->pxlen             = pxlen;
 		route                   = rte_find(n, &proto->p);
 		info->attrs             = rta_clone(route->attrs);
 		assert(route != NULL);
