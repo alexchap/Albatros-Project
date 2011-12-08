@@ -6,7 +6,7 @@
  *	Can be freely distributed and used under the terms of the GNU GPL.
  */
 
-#define LOCAL_DEBUG 1
+#undef LOCAL_DEBUG
 
 #include "nest/bird.h"
 #include "nest/iface.h"
@@ -858,7 +858,7 @@ bgp_do_rx_update(struct bgp_conn *conn,
 #ifdef ROUTE_DAMPING
       if(p->cf->damping)
         {
-         damp_remove_route(p, n, &prefix, pxlen);
+         damping_remove_route(p, n, &prefix, pxlen);
         }
       else
         {
@@ -895,7 +895,7 @@ bgp_do_rx_update(struct bgp_conn *conn,
 #ifdef ROUTE_DAMPING
       if (p->cf->damping)
         {
-          damp_add_route(p, e, &prefix, pxlen);
+          damping_add_route(p, e, &prefix, pxlen);
         }
        else
         {

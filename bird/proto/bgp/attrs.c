@@ -26,21 +26,6 @@
 #include "damping.h"
 #endif
 
-#ifdef ROUTE_DAMPING
-
-static void
-damp_damping_info_init(struct fib_node *N)
-{
-	damping_info *info = (damping_info*)(N);
-
-	info->figure_of_merit = 0;
-	info->current_reuse_list = NULL;
-	info->bgp_connection = NULL;
-	info->attrs = NULL;
-}
-
-#endif
-
 /*
  *   UPDATE message error handling
  *
@@ -1631,6 +1616,17 @@ bgp_attr_init(struct bgp_proto *p)
 		  0, damp_damping_info_init);
 #endif
 }
+
+#ifdef ROUTE_DAMPING
+static void damp_damping_info_init(struct fib_node *N)
+{
+   damping_info *info = (damping_info*)(N);
+   info->figure_of_merit = 0;
+   info->current_reuse_list = NULL;
+   info->bgp_connection = NULL;
+   info->attrs = NULL;
+}
+#endif
 
 void
 bgp_get_route_info(rte *e, byte *buf, ea_list *attrs)

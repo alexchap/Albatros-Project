@@ -526,8 +526,8 @@ bgp_setup_conn(struct bgp_proto *p, struct bgp_conn *conn)
   conn->tx_ev->data = conn;
 
 #ifdef ROUTE_DAMPING
-if(p->cf->damping) {
- if(p->reuse_list_timer == NULL)
+if (p->cf->damping) {
+ if (p->reuse_list_timer == NULL)
    {
     p->reuse_list_timer = tm_new(p->p.pool);
 	p->reuse_list_timer->data = p->cf->dcf;
@@ -1037,8 +1037,10 @@ bgp_check(struct bgp_config *c)
     c->gw_mode = (c->multihop || internal) ? GW_RECURSIVE : GW_DIRECT;
 
 #ifdef ROUTE_DAMPING
+  if (internal && c->damping)
+    cf_error("Bgp route flap damping can only be configured for external neighbors");
   /* Check damping configuration */
-  if(c->damping)
+  if (c->damping)
     damping_config_check(c->dcf);
 #endif
 }
