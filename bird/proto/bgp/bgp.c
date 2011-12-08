@@ -1027,7 +1027,7 @@ bgp_check(struct bgp_config *c)
 #ifdef ROUTE_DAMPING
   /* Check damping configuration */
   if(c->damping)
-    damp_check(c->dcf);
+    damping_config_check(c->dcf);
 #endif
 }
 

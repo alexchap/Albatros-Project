@@ -122,7 +122,7 @@ struct bgp_proto {
 #endif
 
 #ifdef ROUTE_DAMPING
-  struct fib damping_info_fib;
+  struct fib damping_info_fib;		/* Fib storing flap information for all prefixes */
 #endif
 };
 
