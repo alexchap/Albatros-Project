@@ -524,6 +524,14 @@ bgp_setup_conn(struct bgp_proto *p, struct bgp_conn *conn)
   conn->tx_ev = ev_new(p->p.pool);
   conn->tx_ev->hook = bgp_kick_tx;
   conn->tx_ev->data = conn;
+
+#ifdef ROUTE_DAMPING
+ if(p->reuse_list_timer != NULL)
+   {
+    p->reuse_list_timer = tm_new(p->p.pool);
+    tm_start(p->reuse_list_timer, DELTA_T_REUSE);
+   }
+#endif
 }
 
 static void
@@ -919,20 +927,12 @@ bgp_init(struct proto_config *C)
   p->rs_client = c->rs_client;
   p->rr_client = c->rr_client;
   p->igp_table = get_igp_table(c);
+
 #ifdef ROUTE_DAMPING
-
-  if(c->damping) {
+  if(c->damping)
+    {
      damping_config_init(p->cf->dcf);
-
-     DBG("BGP:Damping: Check damp config : %d :   %d,%d,%d,%d,%d,%d \n",
-					p->cf->damping,
-					p->cf->dcf->cut_threshold,
-					p->cf->dcf->reuse_threshold,
-					p->cf->dcf->tmax_hold,
-					p->cf->dcf->half_time_reachable,
-					p->cf->dcf->half_time_unreachable,
-					p->cf->dcf->ceiling);
-  }
+    }
 #endif
   return P;
 }
@@ -1035,7 +1035,7 @@ bgp_check(struct bgp_config *c)
 #ifdef ROUTE_DAMPING
   /* Check damping configuration */
   if(c->damping)
-    damp_check(c->dcf);
+    damping_config_check(c->dcf);
 #endif
 }
 
