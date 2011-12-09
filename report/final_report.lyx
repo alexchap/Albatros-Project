@@ -1,0 +1,305 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass IEEEtran
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Date
+December 2011
+\end_layout
+
+\begin_layout Author
+Alexandre Chappuis, Bastian Marquis and David Klopfenstein @ EPFL.ch
+\end_layout
+
+\begin_layout Title
+Implementation of a BGP Route Flap Damping Algorithm for the Bird Routing
+ Project
+\end_layout
+
+\begin_layout Abstract
+Today's Internet stability strongly relies on the well behavior of dynamic
+ routing protocols such as BGP, the Border Gateway Protocol, that enables
+ routing between Autonomous Systems.
+ Route flapping is a well-known and undesired phenomena that occurs in both
+ commercial and private networks.
+ In this report, we carefully explain our implementation of the RFC 2439,
+ BGP Route Flap Damping, for one famous open source routing software suite,
+ the Bird Routing Project.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The inter-domain routing protocol BGP is still surviving to the gigantic
+ growth of the Internet that has started in the last decade.
+ Many applications used by millions of internet users, such as Skype, suffer
+ however from some weaknesses of that protocol.
+ The main problems are twofolds: Firstly, BGP has a pretty slow convergence,
+ meaning that a change at one location takes quite some time to be propagated
+ throughout the network.
+ Secondly, if a node becomes unstable, for example if its connectivity constantl
+y comes up and down, it will have bad consequences on the network, both
+ in terms of useless processing at routers and unnecessary routing traffic.
+ Routes that are advertised and withdrawns at regular interval of times
+ are said to be flapping.
+\end_layout
+
+\begin_layout Standard
+Many approaches dealing with the flapping behavior do exist since the late
+ 90's.
+ The RFC 2439
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rfc2439"
+
+\end_inset
+
+ was the first standard proposed so that routers could inhibit the propagation
+ of bad-behaving routes, until they become stable again.
+ People have used it extensively for many years, in both commercial and
+ open source routers.
+\end_layout
+
+\begin_layout Standard
+Although this standard is not recommended anymore
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ripe recommendations"
+
+\end_inset
+
+ in today's routers, we wanted to implement it for the Bird Routing Project
+\begin_inset CommandInset citation
+LatexCommand cite
+key "bird"
+
+\end_inset
+
+, hoping that it will serve as a good basis for future possible improvements
+ and extension of this RFC.
+ There exist many variants of the Route Flap Damping alorithm and the community
+ has not lost its interest in finding robust mechanisms that could allow
+ BGP to be more resilient.
+ 
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+picture of penalty evolution here and basic explanations.
+ talk about thresholds used.
+ talk about bird -> C + flexible +...
+\end_layout
+
+\begin_layout Section
+Implementation
+\end_layout
+
+\begin_layout Standard
+this part is kind of straightforward -> just explain how we did it with
+ bird.
+ cite coder's doc + github rep.
+ of code
+\end_layout
+
+\begin_layout Subsection
+Data structures
+\end_layout
+
+\begin_layout Subsection
+Processing withdrawals
+\end_layout
+
+\begin_layout Subsection
+Processing route advertisements
+\end_layout
+
+\begin_layout Subsection
+Configuration parameters
+\end_layout
+
+\begin_layout Subsection
+Timers
+\end_layout
+
+\begin_layout Subsection
+Miscellaneous
+\end_layout
+
+\begin_layout Section
+Evaluation
+\end_layout
+
+\begin_layout Subsection
+Small scale
+\end_layout
+
+\begin_layout Standard
+1 router with ca.
+ 10 neighbors -> topology 3
+\end_layout
+
+\begin_layout Subsection
+30 BGP routers in NSL cluster
+\end_layout
+
+\begin_layout Standard
+what we're going to need :
+\end_layout
+
+\begin_layout Itemize
+numer of route damped for each bgp proto vs.
+ number of diff.
+ routes advertised/withdrawn => show there are less updates and unnecessary
+ traffic when damping = activated
+\end_layout
+
+\begin_layout Itemize
+do it with different parameters ?
+\end_layout
+
+\begin_layout Itemize
+convergence time not affected ?
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+show importance of stability
+\end_layout
+
+\begin_layout Section
+Future work
+\end_layout
+
+\begin_layout Standard
+possible extensions
+\end_layout
+
+\begin_layout Standard
+real scale tests
+\end_layout
+
+\begin_layout Section
+Acknowledgement
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "1"
+key "rfc2439"
+
+\end_inset
+
+The RFC 2439, BGP Route Flap Damping, 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.ietf.org/rfc/rfc2439.txt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "2"
+key "ripe recommendations"
+
+\end_inset
+
+ RIPE Recommendations On Route-flap Damping, 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.ripe.net/ripe/docs/ripe-378"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "3"
+key "bird"
+
+\end_inset
+
+Bird Routing Project, 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://bird.network.cz"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "4"
+key "repository"
+
+\end_inset
+
+Our publicly available repository, 
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/alexchap/Albatros-Project"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
