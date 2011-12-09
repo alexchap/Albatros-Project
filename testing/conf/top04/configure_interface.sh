@@ -42,15 +42,7 @@ fi
 sudo vde_switch -daemon -tap tap11 -tap tap12
 
 # Start bird
-sudo su
-gdb --args bird -c rta.conf -s /usr/local/var/run/bird_rta.ctl -D /var/log/bird-top04-rta.debug
+#sudo bird -c rta.conf -s /usr/local/var/run/bird_rta.ctl -D /var/log/bird-top04-rta.debug &
 
 cat  useful_commands.txt
-
-echo "Packet generation will start in 10 seconds"
-sleep 10
-
-# Start packet generator 
-echo "Starting packet generator"
-sudo ../../tools/mdfmt/update_regenerator/update_regenerator.py -m ../../updates/updates.20100401.1729 -d 10.10.10.11 -a ./ASIP
 

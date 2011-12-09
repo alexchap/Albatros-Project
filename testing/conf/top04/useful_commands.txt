@@ -7,3 +7,5 @@ tail -f /var/log/bird-top04-rta.log
 Check the debug messages of the daemons
 tail -f /var/log/bird-top04-rta.debug
 
+Start the packet generation
+./start_updates.sh

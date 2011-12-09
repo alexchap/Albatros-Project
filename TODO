@@ -19,5 +19,7 @@ Priorities
 
 Not too urgent
 
+- Paramters without underscore !?
 - Documentation
 - Test it on real scale
+- Ipv6 version !? -> in packets.c 

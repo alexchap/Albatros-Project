@@ -49,8 +49,8 @@ protocol bgp {
    # Route damping configuration
    route damping;
    cut_threshold 2500;
-   reuse_threshold 800;
-   tmax_hold 900;
+   reuse_threshold 1000;
+   tmax_hold 3000;
    half_time_reachable 900;
    half_time_unreachable 900;
 

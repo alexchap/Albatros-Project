@@ -29,8 +29,8 @@
  *
  * There are two main functions that are responsible of updating the
  * penalties for the following events :
- * - Withdrawals are received : damp_remove_route is called
- * - Other updates are received : damp_add_route is called
+ * - Withdrawals are received : damping_remove_route is called
+ * - Other updates are received : damping_add_route is called
  *
  * Implementation is done following the requirements of RFC 2439. The
  * system of reuse lists and reuse index arrays is used for efficiency reasons.
@@ -217,6 +217,7 @@ void damping_reuse_timer_handler(struct timer* t)
     if (info->figure_of_merit < dcf->reuse_threshold)
       {
         // reuse the route
+        DBG("BGP:Damping: This prefix can be reused !");
         tmp_rte      = rte_get_temp(info->attrs);
         tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
         rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
@@ -251,12 +252,18 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
       info->prefix            = *addr;
       info->pxlen             = pxlen;
       route                   = rte_find(n, &proto->p);
-      info->attrs             = rta_clone(route->attrs);
-      assert(route != NULL);
-      DBG("BGP:Damping: New alloc for prefix %I/%d\n",*addr,pxlen);
+      if (route!= NULL)
+        {
+          info->attrs         = rta_clone(route->attrs);
+        }
+      else
+        {
+          info->attrs = NULL;
+        }
       rte_update(connection->bgp->p.table,
                  n, &(connection->bgp->p),
                  &(connection->bgp->p), NULL);
+      DBG("BGP:Damping: New alloc for prefix %I/%d\n",*addr,pxlen);
       return;
     }
 
