@@ -104,6 +104,7 @@ struct proto_stats {
   u32 imp_updates_filtered;	/* Number of route updates rejected by filters */
   u32 imp_updates_ignored;	/* Number of route updates rejected as already in route table */
   u32 imp_updates_accepted;	/* Number of route updates accepted and imported */
+  u32 imp_updates_damped;	/* NUmber of route updates damped */
   u32 imp_withdraws_received;	/* Number of route withdraws received */
   u32 imp_withdraws_invalid;	/* Number of route withdraws rejected as invalid */
   u32 imp_withdraws_ignored;	/* Number of route withdraws rejected as already not in route table */
