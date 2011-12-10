@@ -225,7 +225,7 @@ void damping_reuse_timer_handler(struct timer* t)
         tmp_rte      = rte_get_temp(info->attrs);
         tmp_rte->net = net_get(p->p.table, info->prefix, info->pxlen);
         rte_update(p->p.table, tmp_rte->net, &p->p, &p->p, tmp_rte);
-	stats->imp_updates_damped--;
+        stats->imp_updates_damped--;
       }
     else
       {
@@ -303,7 +303,7 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
       rte_update(connection->bgp->p.table,
                  n, &(connection->bgp->p),
                  &(connection->bgp->p), NULL);
-       stats->imp_updates_damped++;
+      stats->imp_updates_damped++;
     }
 
   DBG("BGP:Damping: Prefix %I/%d added to reuse list\n", *addr, pxlen);
@@ -381,11 +381,14 @@ void damping_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int p
           info->figure_of_merit,
           dcf->cut_threshold,
           *addr, pxlen);
-      if (is_suppressed(info)) {
-        s_rem_node(&info->reuse_list_node);
-      } else {
-        stats->imp_updates_damped++;
-      }
+      if (is_suppressed(info))
+        {
+          s_rem_node(&info->reuse_list_node);
+        }
+      else
+        {
+          stats->imp_updates_damped++;
+        }
       s_add_tail(&dcf->reuse_lists[index], &info->reuse_list_node);
       info->current_reuse_list = &dcf->reuse_lists[index];
     }
@@ -404,3 +407,23 @@ void damping_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int p
     }
   return;
 }
+/* Show dampened path */
+void show_dampened_path(struct fib* damping_info_fib)
+{
+  rte *e;
+  damping_info *info;
+
+  DBG("BGP:Damping: Show dampened paths:\n");
+  FIB_WALK(damping_info_fib, info)
+  {
+    info = (damping_info*)info;
+    if (is_suppressed(info))
+      {
+        DBG("BGP:Damping: dampened Route=%I/%d",
+            info->prefix, info->pxlen);
+
+      }
+  }
+  FIB_WALK_END;
+}
+

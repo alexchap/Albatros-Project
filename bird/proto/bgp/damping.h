@@ -70,6 +70,9 @@ void damping_config_init(struct damping_config * dcf);
 void damping_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 void damping_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
 
+/* Show dampened path */
+void show_dampened_path(struct fib*);
+
 /* Default configuration values used by config.Y */
 #define DEFAULT_CUT_THRESHOLD		1500
 #define DEFAULT_REUSE_THRESHOLD		750
