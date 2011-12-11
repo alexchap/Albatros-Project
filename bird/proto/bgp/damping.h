@@ -71,7 +71,7 @@ void damping_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 void damping_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
 
 /* Show dampened path */
-void show_dampened_path(struct fib*);
+void show_dampened_paths(struct proto *p);
 
 /* Default configuration values used by config.Y */
 #define DEFAULT_CUT_THRESHOLD		1500

@@ -43,8 +43,9 @@
 #include <stdio.h>
 #include "nest/bird.h"
 #include "lib/timer.h"
-#include "bgp.h"
+#include "nest/cli.h"
 #include "conf/conf.h"
+#include "bgp.h"
 #include "damping.h"
 
 // name conflict with math's log function
@@ -407,23 +408,44 @@ void damping_add_route(struct bgp_proto *proto, rte *route, ip_addr *addr, int p
     }
   return;
 }
-/* Show dampened path */
-void show_dampened_path(struct fib* damping_info_fib)
-{
-  rte *e;
-  damping_info *info;
 
-  DBG("BGP:Damping: Show dampened paths:\n");
-  FIB_WALK(damping_info_fib, info)
+/* Show dampened path */
+void show_dampened_paths(struct proto *p)
+{
+  struct bgp_proto *proto = (struct bgp_proto *) p;
+  struct fib* damping_info_fib = &(proto->damping_info_fib);
+  struct damping_info *info;
+  int total_routes = 0;
+
+  DBG("BGP:Damping: Show dampened paths called\n");
+  cli_msg(-1007,"Current Route Flap Damping parameters");
+  cli_msg(-1007,"  Reuse threshold   : %d", proto->cf->dcf->reuse_threshold);
+  cli_msg(-1007,"  Cut threshold     : %d", proto->cf->dcf->cut_threshold);
+  cli_msg(-1007,"  Max suppress time : %d", proto->cf->dcf->tmax_hold);
+  cli_msg(-1007,"Dampened routes");
+
+  FIB_WALK(damping_info_fib, fn)
   {
-    info = (damping_info*)info;
+    info = (struct damping_info *) fn;
     if (is_suppressed(info))
       {
-        DBG("BGP:Damping: dampened Route=%I/%d",
-            info->prefix, info->pxlen);
+        total_routes++;
+        cli_msg(-1007,"  %I/%d, current penalty %d, last updated %d seconds ago",
+                info->prefix, info->pxlen,info->figure_of_merit, now - info->last_time_updated);
 
       }
   }
   FIB_WALK_END;
+  cli_msg(-1007,"");
+  if (total_routes == 0)
+    {
+      cli_msg(-1007,"No route is currently damped. Congrats !");
+    }
+  else
+    {
+      cli_msg(-1007,"Total : %d",total_routes);
+    }
+  cli_msg(0, "");
+
 }
 

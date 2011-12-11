@@ -19,8 +19,8 @@ sudo ip link set tap11 up
 sudo ip link set tap12 up
 
 # Edit routing tables
-sudo ip ro add 10.10.10.11/32 dev tap12  
-sudo ip ro add 10.10.10.12/32 dev tap11  
+sudo ip ro add 10.10.10.11/32 dev tap12 
+sudo ip ro add 10.10.10.12/32 dev tap11
 
 # Add specific routing tables for each router
 already_done=`cat /etc/iproute2/rt_tables | egrep "(rta|rtb|flap)" | wc -l`

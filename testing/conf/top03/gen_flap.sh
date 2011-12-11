@@ -3,12 +3,12 @@
 # This script generates a flapping behavior for one route
 
 # Parameters
-INTERVAL=15;
+INTERVAL=2;
 FROUTE="211.11.11.12/32" # Fake route that flaps
 TABLE="flap";
 METRIC_HIGH=1000;
 METRIC_LOW=100;
-FLAP_TYPE=2; # 1 = add/remove route continuously -> generates updates and withdrawals
+FLAP_TYPE=1; # 1 = add/remove route continuously -> generates updates and withdrawals
 	     # 2 = add route with high metric first and the add/del route with lower metric 
 	     #     -> only generates updates
 

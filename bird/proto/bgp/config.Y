@@ -137,7 +137,9 @@ CF_ADDTO(dynamic_attr, BGP_CLUSTER_LIST
 CF_ADDTO(dynamic_attr, BGP_EXT_COMMUNITY
 	{ $$ = f_new_dynamic_attr(EAF_TYPE_EC_SET, T_ECLIST, EA_CODE(EAP_BGP, BA_EXT_COMMUNITY)); })
 
-
+CF_CLI(SHOW BGP DAMPENED PATHS, optsym opttext, [<name>], [[Show damped routes for a BGP protocol]])
+{ show_dampened_paths(proto_get_named($5, &proto_bgp)); };
+ 
 
 CF_ENUM(T_ENUM_BGP_ORIGIN, ORIGIN_, IGP, EGP, INCOMPLETE)
 
