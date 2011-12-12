@@ -63,8 +63,7 @@ void damping_reuse_timer_handler(struct timer*);
 
 /* Functions called from  packets.c or bgp.c */
 void damping_config_check(struct damping_config * dcf);
-struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
-    int tmax_hold, int half_time);
+struct damping_config *damping_config_new(int,int,int,int);
 void damping_config_init(struct damping_config * dcf);
 void damping_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 void damping_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);

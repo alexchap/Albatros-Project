@@ -214,6 +214,7 @@ void proto_cmd_restart(struct proto *, unsigned int, int);
 void proto_cmd_reload(struct proto *, unsigned int, int);
 void proto_cmd_debug(struct proto *, unsigned int, int);
 void proto_cmd_mrtdump(struct proto *, unsigned int, int);
+void proto_cmd_show_damped_paths(struct proto *p, unsigned int, int);
 
 void proto_apply_cmd(struct proto_spec ps, void (* cmd)(struct proto *, unsigned int, int), int restricted, unsigned int arg);
 struct proto *proto_get_named(struct symbol *, struct protocol *);

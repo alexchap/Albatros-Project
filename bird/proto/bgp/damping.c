@@ -427,11 +427,12 @@ void show_dampened_paths(struct proto *p)
   int total_routes = 0;
 
   DBG("BGP:Damping: Show dampened paths called\n");
-  cli_msg(-1007,"Current Route Flap Damping parameters");
-  cli_msg(-1007,"  Reuse threshold   : %d", proto->cf->dcf->reuse_threshold);
-  cli_msg(-1007,"  Cut threshold     : %d", proto->cf->dcf->cut_threshold);
-  cli_msg(-1007,"  Max suppress time : %d", proto->cf->dcf->tmax_hold);
-  cli_msg(-1007,"Dampened routes");
+  cli_msg(-1007,"   Current Route Flap Damping parameters");
+  cli_msg(-1007,"     Reuse threshold       : %d", proto->cf->dcf->reuse_threshold);
+  cli_msg(-1007,"     Cut threshold         : %d", proto->cf->dcf->cut_threshold);
+  cli_msg(-1007,"     Max suppress time     : %d", proto->cf->dcf->tmax_hold);
+  cli_msg(-1007,"     Max penalty (ceiling) : %d", proto->cf->dcf->ceiling);
+  cli_msg(-1007,"   Dampened routes");
 
   FIB_WALK(damping_info_fib, fn)
   {
@@ -439,20 +440,20 @@ void show_dampened_paths(struct proto *p)
     if (is_suppressed(info))
       {
         total_routes++;
-        cli_msg(-1007,"  %I/%d, current penalty %d, last updated %d seconds ago",
+        cli_msg(-1007,"     %I/%d, current penalty %d, last updated %d seconds ago",
                 info->prefix, info->pxlen,info->figure_of_merit, now - info->last_time_updated);
 
       }
   }
   FIB_WALK_END;
-  cli_msg(-1007,"");
   if (total_routes == 0)
     {
-      cli_msg(-1007,"No route is currently damped. Congrats !");
+      cli_msg(-1007,"     No route is currently damped. Congrats !");
     }
   else
     {
-      cli_msg(-1007,"Total : %d",total_routes);
+      cli_msg(-1007,"");
+      cli_msg(-1007,"     Total : %d",total_routes);
     }
   cli_msg(0, "");
 

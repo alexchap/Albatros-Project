@@ -345,6 +345,9 @@ CF_CLI(SHOW INTERFACES,,, [[Show network interfaces]])
 CF_CLI(SHOW INTERFACES SUMMARY,,, [[Show summary of network interfaces]])
 { if_show_summary(); } ;
 
+CF_CLI(SHOW DAMPENED PATHS, proto_patt2, <protocol> | \"<pattern>\" | all, [[Show damped routes]] )
+{ proto_apply_cmd($4,proto_cmd_show_damped_paths, 0, 0); } ; 
+
 CF_CLI(SHOW ROUTE, r_args, [[[<prefix>|for <prefix>|for <ip>] [table <t>] [filter <f>|where <cond>] [all] [primary] [(export|preexport) <p>] [protocol <p>] [stats|count]]], [[Show routing table]])
 { rt_show($3); } ;
 
