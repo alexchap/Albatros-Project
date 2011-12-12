@@ -1,9 +1,8 @@
-%% LyX 1.6.5 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
 \documentclass[a4paper,english]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{babel}
+\usepackage{graphicx}
 
 \usepackage[unicode=true, pdfusetitle,
  bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
@@ -21,31 +20,34 @@
 Routing Project}
 \maketitle
 \begin{abstract}
-Today's Internet stability strongly relies on the well behavior of
-dynamic routing protocols such as BGP, the Border Gateway Protocol,
+
+Today's Internet stability strongly relies on the good behavior of
+dynamic routing protocols such as BGP (Border Gateway Protocol),
 that enables routing between Autonomous Systems. Route flapping is
-a well-known and undesired phenomena that occurs in both commercial
+a well-known and undesirable phenomena occuring in both commercial
 and private networks. In this report, we carefully explain our implementation
 of the RFC 2439, BGP Route Flap Damping, for one famous open source
 routing software suite, the Bird Routing Project.
+
 \end{abstract}
 
 \section{Introduction}
 
 The inter-domain routing protocol BGP is still surviving to the gigantic
-growth of the Internet that has started in the last decade. Many applications
-used by millions of internet users, such as Skype, suffer however
-from some weaknesses of that protocol. The main problems are twofolds:
-Firstly, BGP has a pretty slow convergence, meaning that a change
+growth of the Internet that started during the last decade.
+However, some widely used applications, such as Skype, still suffer from weaknesses
+of that protocol.
+The main problems are twofolds:
+Firstly, BGP has a slow convergence rate, meaning that a change
 at one location takes quite some time to be propagated throughout
 the network. Secondly, if a node becomes unstable, for example if
 its connectivity constantly comes up and down, it will have bad consequences
-on the network, both in terms of useless processing at routers and
-unnecessary routing traffic. Routes that are advertised and withdrawns
-at regular interval of times are said to be flapping.
+on the network, both in terms of useless processing at BGP routers and
+unnecessary routing traffic. Routes advertised and withdrawn
+at regular interval of time are said to be flapping.
 
-Many approaches dealing with the flapping behavior do exist since
-the late 90's. The RFC 2439\cite{rfc2439} was the first standard
+Many approaches dealing with route flapping have been developped in the late 90's.
+The RFC 2439\cite{rfc2439} was the first standard
 proposed so that routers could inhibit the propagation of bad-behaving
 routes, until they become stable again. People have used it extensively
 for many years, in both commercial and open source routers.
@@ -61,9 +63,24 @@ allow BGP to be more resilient.
 
 \section{Overview}
 
-picture of penalty evolution here and basic explanations. talk about
-thresholds used. talk about bird -> C + flexible +...
+RFC 2349 seeks to limit the impact of route flapping by ``damping'' (\textit{i.e.} ignoring packets of) missbehaving routes.
+The solution must be able to distinguish flapping routes from good routes, consume few resources, both in terms of memory usage and process time.
+The RFC solves these problems by assigning each route a penalty term.
+Whenever this penalty term for a given route reaches a certain threshold, further advertisements for that route are ignored.
+This penalty term varies over time : it is increased when the route becomes unreachable and decays as long as the route stays stable.
+As soon as the figure of merit goes below a \textit{reuse threshold}, the route becomes again eligible for use.
 
+The figure of merits decays exponentially over time.
+Exponential decay has several advantages : it can be implemented very efficiently using precomputed \textit{decay arrays}.
+Also, using exponential decay, the figure of merit keeps trace of previous instabilities for a fairly long time : old instabilities become less and less important over time, while newer ones have more weight.
+
+Network administrators have lots of freedom in choosing the behavior of the penalty term.
+
+Here is an example showing how the figure of merit evolve over time.
+The route flapped four times before exceeding the \textit{cut threshold}.
+It then remained stable.
+
+The RFC proposes several optimizations to decrease processing time, at the cost of a slightly bigger memory footprint.
 
 \section{Implementation}
 

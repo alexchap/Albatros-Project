@@ -55,6 +55,8 @@
 #undef log
 #endif
 
+FILE *f;
+
 /**
  * A new damping configuration is allocated for the BGP instance
  */
@@ -83,6 +85,8 @@ void damping_config_init(struct damping_config *dcf)
 
   int i;
   double max_ratio, t;
+  f = fopen("/home/bkm/log.txt", "w");
+
   dcf->ceiling = (int) ((double)dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time) * log(2.0));
 
   dcf->decay_array_size = dcf->tmax_hold / DELTA_T;
@@ -214,6 +218,10 @@ void damping_reuse_timer_handler(struct timer* t)
     stats = &(pro->stats);
 
     info->figure_of_merit = get_new_figure_of_merit(info, now,dcf);
+
+	fprintf(f, "%d %d\n", now, info->figure_of_merit);
+	fflush(f);
+
     DBG("%d\n", info->figure_of_merit);
     info->last_time_updated = now;
 
