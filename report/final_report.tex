@@ -1,0 +1,135 @@
+%% LyX 1.6.5 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[a4paper,english]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+
+\usepackage[unicode=true, pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\begin{document}
+
+\date{December 2011}
+
+
+\author{Alexandre Chappuis, Bastian Marquis and David Klopfenstein @ EPFL.ch}
+
+
+\title{Implementation of a BGP Route Flap Damping Algorithm for the Bird
+Routing Project}
+\maketitle
+\begin{abstract}
+Today's Internet stability strongly relies on the well behavior of
+dynamic routing protocols such as BGP, the Border Gateway Protocol,
+that enables routing between Autonomous Systems. Route flapping is
+a well-known and undesired phenomena that occurs in both commercial
+and private networks. In this report, we carefully explain our implementation
+of the RFC 2439, BGP Route Flap Damping, for one famous open source
+routing software suite, the Bird Routing Project.
+\end{abstract}
+
+\section{Introduction}
+
+The inter-domain routing protocol BGP is still surviving to the gigantic
+growth of the Internet that has started in the last decade. Many applications
+used by millions of internet users, such as Skype, suffer however
+from some weaknesses of that protocol. The main problems are twofolds:
+Firstly, BGP has a pretty slow convergence, meaning that a change
+at one location takes quite some time to be propagated throughout
+the network. Secondly, if a node becomes unstable, for example if
+its connectivity constantly comes up and down, it will have bad consequences
+on the network, both in terms of useless processing at routers and
+unnecessary routing traffic. Routes that are advertised and withdrawns
+at regular interval of times are said to be flapping.
+
+Many approaches dealing with the flapping behavior do exist since
+the late 90's. The RFC 2439\cite{rfc2439} was the first standard
+proposed so that routers could inhibit the propagation of bad-behaving
+routes, until they become stable again. People have used it extensively
+for many years, in both commercial and open source routers.
+
+Although this standard is not recommended anymore\cite{ripe recommendations}
+in today's routers, we wanted to implement it for the Bird Routing
+Project\cite{bird}, hoping that it will serve as a good basis for
+future possible improvements and extension of this RFC. There exist
+many variants of the Route Flap Damping alorithm and the community
+has not lost its interest in finding robust mechanisms that could
+allow BGP to be more resilient. 
+
+
+\section{Overview}
+
+picture of penalty evolution here and basic explanations. talk about
+thresholds used. talk about bird -> C + flexible +...
+
+
+\section{Implementation}
+
+this part is kind of straightforward -> just explain how we did it
+with bird. cite coder's doc + github rep. of code
+
+
+\subsection{Data structures}
+
+
+\subsection{Processing withdrawals}
+
+
+\subsection{Processing route advertisements}
+
+
+\subsection{Configuration parameters}
+
+
+\subsection{Timers}
+
+
+\subsection{Miscellaneous}
+
+
+\section{Evaluation}
+
+
+\subsection{Small scale}
+
+1 router with ca. 10 neighbors -> topology 3
+
+
+\subsection{30 BGP routers in NSL cluster}
+
+what we're going to need :
+\begin{itemize}
+\item numer of route damped for each bgp proto vs. number of diff. routes
+advertised/withdrawn => show there are less updates and unnecessary
+traffic when damping = activated
+\item do it with different parameters ?
+\item convergence time not affected ?
+\end{itemize}
+
+\section{Conclusion}
+
+show importance of stability
+
+
+\section{Future work}
+
+possible extensions
+
+real scale tests
+
+
+\section{Acknowledgement}
+\begin{thebibliography}{4}
+\bibitem[1]{rfc2439}The RFC 2439, BGP Route Flap Damping, \href{http://www.ietf.org/rfc/rfc2439.txt}{http://www.ietf.org/rfc/rfc2439.txt}
+
+\bibitem[2]{ripe recommendations} RIPE Recommendations On Route-flap
+Damping, \href{http://www.ripe.net/ripe/docs/ripe-378}{http://www.ripe.net/ripe/docs/ripe-378}
+
+\bibitem[3]{bird}Bird Routing Project, \href{http://bird.network.cz}{http://bird.network.cz}
+
+\bibitem[4]{repository}Our publicly available repository, \href{https://github.com/alexchap/Albatros-Project}{https://github.com/alexchap/Albatros-Project}
+\end{thebibliography}
+
+\end{document}

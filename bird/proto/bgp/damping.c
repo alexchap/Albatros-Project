@@ -308,8 +308,10 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
     }
 
   DBG("BGP:Damping: Prefix %I/%d added to reuse list\n", *addr, pxlen);
-  s_add_tail(&(dcf->reuse_lists[index]), &info->reuse_list_node);
-  info->current_reuse_list = &(dcf->reuse_lists[index]);
+  if(info->figure_of_merit >= dcf->cut_threshold) {
+    s_add_tail(&(dcf->reuse_lists[index]), &info->reuse_list_node);
+    info->current_reuse_list = &(dcf->reuse_lists[index]);
+  }
   info->last_time_updated  = now;
   return;
 }
