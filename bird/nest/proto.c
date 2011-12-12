@@ -19,6 +19,7 @@
 #include "nest/iface.h"
 #include "nest/cli.h"
 #include "filter/filter.h"
+#include "proto/bgp/damping.h"
 
 pool *proto_pool;
 
@@ -984,6 +985,15 @@ proto_cmd_reload(struct proto *p, unsigned int dir, int cnt UNUSED)
     proto_request_feeding(p);
 
   cli_msg(-15, "%s: reloading", p->name);
+}
+
+void proto_cmd_show_damped_paths(struct proto *p, unsigned int dir UNUSED, int cnt UNUSED){
+  cli_msg(-1005, "%s:",p->name);
+  /* Only apply for BGP protocols now */
+  if(p->cf->protocol == &proto_bgp)
+    show_dampened_paths(p);
+  else
+    cli_msg(-1005,"No damping capability for this kind of protocol");
 }
 
 void
