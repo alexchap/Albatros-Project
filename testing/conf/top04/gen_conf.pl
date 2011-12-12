@@ -51,8 +51,7 @@ protocol bgp {
    cut_threshold 2500;
    reuse_threshold 1000;
    tmax_hold 3000;
-   half_time_reachable 900;
-   half_time_unreachable 900;
+   half_time 900;
 
    gateway recursive;
 

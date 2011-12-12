@@ -24,8 +24,7 @@
  * -> cut_threshold : the penalty above which a route is suppressed
  * -> reuse_threshold : the penalty below which a route is reused
  * -> tmax_hold : the maximum time a route can be suppressed
- * -> half_time_reachable : decay parameter for reachables routes
- * -> half_time_unreachable : decay parameter for unreachable routes.
+ * -> half_time : decay parameter for unreachable routes.
  *
  * There are two main functions that are responsible of updating the
  * penalties for the following events :
@@ -60,18 +59,17 @@
  * A new damping configuration is allocated for the BGP instance
  */
 struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
-    int tmax_hold, int half_time_reachable, int half_time_unreachable)
+    int tmax_hold, int half_time)
 {
   struct damping_config * dcf = cfg_alloc(sizeof(damping_config));
   dcf->cut_threshold          = cut_threshold;
   dcf->reuse_threshold        = reuse_threshold;
   dcf->tmax_hold              = tmax_hold;
-  dcf->half_time_reachable    = half_time_reachable;
-  dcf->half_time_unreachable  = half_time_unreachable;
+  dcf->half_time  = half_time;
 
   DBG("BGP:Damping: New damping_config, with parameters (cut_threshold %d, reuse_threshold %d,"
-      "tmax_hold %d, half_time_reachable %d, half_time_unreachable %d)\n",
-      cut_threshold, reuse_threshold, tmax_hold, half_time_reachable, half_time_unreachable);
+      "tmax_hold %d, half_time %d)\n",
+      cut_threshold, reuse_threshold, tmax_hold, half_time);
   return dcf;
 }
 
@@ -85,20 +83,20 @@ void damping_config_init(struct damping_config *dcf)
 
   int i;
   double max_ratio, t;
-  dcf->ceiling = (int) ((double)dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
+  dcf->ceiling = (int) ((double)dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time) * log(2.0));
 
   dcf->decay_array_size = dcf->tmax_hold / DELTA_T;
   dcf->decay_array = cfg_alloc(dcf->decay_array_size * sizeof(double));
 
   dcf->decay_array[0] = 1.0;
-  dcf->decay_array[1] = exp(log(0.5) * (1.0 / (dcf->half_time_unreachable / DELTA_T)));
+  dcf->decay_array[1] = exp(log(0.5) * (1.0 / (dcf->half_time / DELTA_T)));
   for (i = 2; i < dcf->decay_array_size; ++i)
     {
       dcf->decay_array[i] = dcf->decay_array[i-1] * dcf->decay_array[1];
     }
 
   max_ratio = (double)dcf->ceiling / dcf->reuse_threshold;
-  t = exp(log(2.0) / (dcf->half_time_unreachable / dcf->tmax_hold));
+  t = exp(log(2.0) / (dcf->half_time / dcf->tmax_hold));
   if (max_ratio > t)
     max_ratio = t;
 
@@ -108,7 +106,7 @@ void damping_config_init(struct damping_config *dcf)
 
   for (i = 0; i < N_REUSE_LISTS; ++i)
     {
-      dcf->reuse_lists_index[i] = (int)((dcf->half_time_unreachable / DELTA_T_REUSE) *
+      dcf->reuse_lists_index[i] = (int)((dcf->half_time / DELTA_T_REUSE) *
                                         log(1.0 / (dcf->reuse_threshold * (1 + (i / dcf->reuse_scale_factor)))
                                             / log(0.5)));
       s_init_list(dcf->reuse_lists + i);
@@ -126,7 +124,7 @@ void damping_config_check(struct damping_config * dcf)
   if (dcf->reuse_threshold >= dcf->cut_threshold)
     cf_error("Reuse threshold must be smaller than the cut threshold");
 
-  int ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time_unreachable) * log(2.0));
+  int ceiling = (int) (dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time) * log(2.0));
   if (ceiling <= 0)
     cf_error("Wrong parameters for damping, leading to a negative ceiling !");
   if (ceiling <= dcf->cut_threshold)
@@ -308,10 +306,11 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
     }
 
   DBG("BGP:Damping: Prefix %I/%d added to reuse list\n", *addr, pxlen);
-  if(info->figure_of_merit >= dcf->cut_threshold) {
-    s_add_tail(&(dcf->reuse_lists[index]), &info->reuse_list_node);
-    info->current_reuse_list = &(dcf->reuse_lists[index]);
-  }
+  if (info->figure_of_merit >= dcf->cut_threshold)
+    {
+      s_add_tail(&(dcf->reuse_lists[index]), &info->reuse_list_node);
+      info->current_reuse_list = &(dcf->reuse_lists[index]);
+    }
   info->last_time_updated  = now;
   return;
 }

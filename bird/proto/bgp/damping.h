@@ -27,8 +27,7 @@ typedef struct damping_config
   int reuse_threshold;		/* Value below which a route is reused */
 
   time_t tmax_hold;		/* Max time a route can be suppressed */
-  time_t half_time_reachable;	/* Decay parameter for reachable prefixes */
-  time_t half_time_unreachable;	/* Decay parameter for unreachable prefixes */
+  time_t half_time;		/* Decay parameter for prefixes */
 
   int ceiling;			/* Maximum penalty allowed */
 
@@ -65,7 +64,7 @@ void damping_reuse_timer_handler(struct timer*);
 /* Functions called from  packets.c or bgp.c */
 void damping_config_check(struct damping_config * dcf);
 struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold,
-    int tmax_hold, int half_time_reachable, int half_time_unreachable);
+    int tmax_hold, int half_time);
 void damping_config_init(struct damping_config * dcf);
 void damping_remove_route(struct bgp_proto*, net *n, ip_addr*, int);
 void damping_add_route(struct bgp_proto*, struct rte*, ip_addr*, int);
@@ -76,8 +75,7 @@ void show_dampened_paths(struct proto *p);
 /* Default configuration values used by config.Y */
 #define DEFAULT_CUT_THRESHOLD		1500
 #define DEFAULT_REUSE_THRESHOLD		750
-#define DEFAULT_HALF_TIME_REACHABLE	900
-#define DEFAULT_HALF_TIME_UNREACHABLE	900
+#define DEFAULT_HALF_TIME		900
 #define DEFAULT_TMAX_HOLD		3000
 
 /* Other parameters */

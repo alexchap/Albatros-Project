@@ -28,8 +28,7 @@ CF_KEYWORDS(BGP, LOCAL, NEIGHBOR, AS, HOLD, TIME, CONNECT, RETRY,
 	PREFER, OLDER, MISSING, LLADDR, DROP, IGNORE, ROUTE, REFRESH,
 	INTERPRET, COMMUNITIES, BGP_ORIGINATOR_ID, BGP_CLUSTER_LIST, IGP,
 	TABLE, GATEWAY, DIRECT, RECURSIVE, MED, TTL, SECURITY,
-	DAMPING, HALF_TIME_REACHABLE, HALF_TIME_UNREACHABLE,
-	CUT_THRESHOLD, REUSE_THRESHOLD, TMAX_HOLD)
+	DAMPING, HALF_TIME, CUT_THRESHOLD, REUSE_THRESHOLD, TMAX_HOLD)
 
 CF_GRAMMAR
 
@@ -55,7 +54,7 @@ bgp_proto_start: proto_start BGP {
      BGP_CFG->default_local_pref = 100;
      BGP_CFG->damping = 0;
      BGP_CFG->dcf = damping_config_new(DEFAULT_REUSE_THRESHOLD, DEFAULT_CUT_THRESHOLD,
-	DEFAULT_TMAX_HOLD, DEFAULT_HALF_TIME_REACHABLE,DEFAULT_HALF_TIME_UNREACHABLE);
+	DEFAULT_TMAX_HOLD, DEFAULT_HALF_TIME);
  }
  ;
 
@@ -109,8 +108,7 @@ bgp_proto:
  | bgp_proto ROUTE DAMPING bool ';' { BGP_CFG->damping = $4; }
  | bgp_proto REUSE_THRESHOLD expr ';' { BGP_CFG->dcf->reuse_threshold = $3;}
  | bgp_proto CUT_THRESHOLD expr ';' { BGP_CFG->dcf->cut_threshold = $3;}
- | bgp_proto HALF_TIME_REACHABLE expr ';' { BGP_CFG->dcf->half_time_reachable = $3;}
- | bgp_proto HALF_TIME_UNREACHABLE expr ';' { BGP_CFG->dcf->half_time_unreachable = $3;}
+ | bgp_proto HALF_TIME expr ';' { BGP_CFG->dcf->half_time = $3;}
  | bgp_proto TMAX_HOLD expr ';' { BGP_CFG->dcf->tmax_hold = $3;}
  ;
 

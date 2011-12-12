@@ -5,13 +5,9 @@ Status : 8th December 2011
 Priorities
 
 - damping.c : Fix ambiguity with variable names proto vs. p
-- damping :  Create a function show damped routes & enable it from birdc interface
-  -> use cli_msg (see bgp.c and ospf.c for example of use)
-  -> Add CLI messages to config file parser (config.Y)
+- damping : create show dampened paths all ! (all protocols)
 - damping : Create a flap statistics struct
   -> we need statistics about flapping routes
-- Separate the cases when routes are UNreachable or reachable 
-  -> we need more arrays in the damping_config
 - Testing : two route flaps + many neighbors  
 
 - FIX compilation problem when no damping -> can we define a conditional grammar in config.Y ?
