@@ -1,4 +1,5 @@
 \documentclass[a4paper,english]{IEEEtran}
+
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{babel}
@@ -60,7 +61,6 @@ many variants of the Route Flap Damping alorithm and the community
 has not lost its interest in finding robust mechanisms that could
 allow BGP to be more resilient. 
 
-
 \section{Overview}
 
 RFC 2349 seeks to limit the impact of route flapping by ``damping'' (\textit{i.e.} ignoring packets of) missbehaving routes.
@@ -68,19 +68,21 @@ The solution must be able to distinguish flapping routes from good routes, consu
 The RFC solves these problems by assigning each route a penalty term.
 Whenever this penalty term for a given route reaches a certain threshold, further advertisements for that route are ignored.
 This penalty term varies over time : it is increased when the route becomes unreachable and decays as long as the route stays stable.
-As soon as the figure of merit goes below a \textit{reuse threshold}, the route becomes again eligible for use.
+As soon as the figure of merit goes below a \textit{reuse threshold}, the route can be used again.
 
 The figure of merits decays exponentially over time.
 Exponential decay has several advantages : it can be implemented very efficiently using precomputed \textit{decay arrays}.
 Also, using exponential decay, the figure of merit keeps trace of previous instabilities for a fairly long time : old instabilities become less and less important over time, while newer ones have more weight.
 
-Network administrators have lots of freedom in choosing the behavior of the penalty term.
+Network administrators have lots of freedom in choosing the behavior of the penalty term : they can control the half-life of the penalty term, its maximum value (thus controlling the maximum time a route can be damped) and both the reuse and cut thresholds.
 
 Here is an example showing how the figure of merit evolve over time.
 The route flapped four times before exceeding the \textit{cut threshold}.
 It then remained stable.
 
 The RFC proposes several optimizations to decrease processing time, at the cost of a slightly bigger memory footprint.
+\textit{E.g. reuse lists} are used to not have to recompute the figure of merit of all routes : damped routes with similar penalty terms are grouped together in a same reuse list.
+Penalty terms of the routes in a given reuse list are then re-computed only when necessary.
 
 \section{Implementation}
 
