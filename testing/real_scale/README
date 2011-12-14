@@ -1,0 +1,26 @@
+Directory structure 
+
+- bird : official bird, not modified
+- bird/compiled : idem but compiled version
+- conf-bird : configuration files for official bird daemon
+
+- ourbird : our modified bird
+- ourbird/compiled : idem but compiled version
+- conf-ourbird : configuration files for our bird setup (with damping)
+
+- log-dbg : log and debug files storage
+- socket : bird unix sockets -> access via birdc
+
+- mdfmt : feeder program (python)
+- updates : updates for the feeder
+
+
+Scripts
+
+- start_bird.sh : start traditional bird with the topology
+- start_ourbird.sh : start our bird with the topology, and route damping ON
+- reset_all.sh : clean the logs, kill the daemons
+
+Files
+
+- eval-topo.ppt : the topology overview

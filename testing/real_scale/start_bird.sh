@@ -5,8 +5,6 @@
 # Configuration files directory : conf-bird/
 # NO DAMPING IS ACTIVATED WITH THIS TOPOLOGY
 
-# TODO: change log files in each configuration file !
-
 BIRD='/opt/acnds_11_2/bird/compiled/sbin/bird';
 BIRDC="$BIRD"'c';
 
@@ -17,19 +15,21 @@ DBG_SUFFIX='.debug';
 SOCKET_PREFIX='/opt/acnds_11_2/sockets/bird-'"$RT_PREFIX";
 SOCKET_SUFFIX='.c';
 
+
 # Loop over all 27 nodes and start bird
 
 for i in `seq 1 27`
 do
-echo "Starting router $i"
-$BIRD -c "$CONF_PREFIX""$i""$CONF_SUFFIX" -s  "$SOCKET_PREFIX""$i""$SOCKET_SUFFIX" -D  "$DBG_PREFIX""$i""$DBG_SUFFIX" &
+  # start node i
+  echo "Starting router $i"
+  $BIRD -c "$CONF_PREFIX""$i""$CONF_SUFFIX" -s  "$SOCKET_PREFIX""$i""$SOCKET_SUFFIX" -D  "$DBG_PREFIX""$i""$DBG_SUFFIX" &
+
+  # start stat_collector for node i
+
+  # TODO
 
 done
 
-
-# Start feeder (node with ip 10.0.0.3)
-
-# TODO
 
 # Start log collector (i.e connect to birdc and execute some
 # commands at regular time intervals)
@@ -38,4 +38,5 @@ done
 # - statistics for each protocol (show protocols all)
 
 
-# TODO
+# Start feeder (node with ip 10.0.0.3)
+./start_feeder.sh &
