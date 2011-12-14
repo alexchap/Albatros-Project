@@ -1,15 +1,10 @@
 TODO project albatros
 
-Status : 8th December 2011
+Status : 15th December 2011
 
 Priorities
 
 - damping.c : Fix ambiguity with variable names proto vs. p
-- damping : create show dampened paths all ! (all protocols)
-- damping : Create a flap statistics struct
-  -> we need statistics about flapping routes
-- Testing : two route flaps + many neighbors  
-
 - FIX compilation problem when no damping -> can we define a conditional grammar in config.Y ?
   i.e if route damping is disabled, no need to create damping_config !
   same question for including dampin.c in the makefile -> conditional ?
