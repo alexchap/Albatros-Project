@@ -23,9 +23,9 @@ Routing Project}
 Today's Internet stability strongly relies on the good behavior of
 dynamic routing protocols such as BGP (Border Gateway Protocol),
 that enables routing between Autonomous Systems. Route flapping is
-a well-known and undesirable phenomena occuring in both commercial
+a well-known and undesirable phenomenon occuring in both commercial
 and private networks. In this report, we explain our implementation
-of the RFC 2439, BGP Route Flap Damping, for one famous open source
+of the RFC 2439, BGP Route Flap Damping, for one famous Open Source
 routing software suite, the Bird Routing Project.
 
 \par
@@ -43,23 +43,21 @@ However, some widely used applications, such as Skype, still suffer from weaknes
 of that protocol.
 The main problems are twofolds:
 Firstly, BGP has a slow convergence rate, meaning that a change
-at one location takes quite some time to be propagated throughout
+at one location takes quite some time to be propagated to the other ends of 
 the network. Secondly, if a node becomes unstable, for example if
 its connectivity constantly comes up and down, it will have bad consequences
 on the network, both in terms of useless processing at BGP routers and
 unnecessary routing traffic. Routes advertised and withdrawn
-at regular interval of time are said to be flapping.
+at regular interval of time are said to be \textit{flapping}.
 
-Many approaches dealing with route flapping have been developped in the late 90's.
-The RFC 2439\cite{rfc2439} was the first standard
-proposed so that routers could inhibit the propagation of bad-behaving
-routes, until they become stable again. People have used it extensively
-for many years, in both commercial and open source routers.
+Many approaches to counter route flapping have been developped in the late 90's.
+RFC 2439\cite{rfc2439} standardized one such approach : it basically blocks updates from flapping routes, and does so until the routes are deemed stable again.
+This RFC has been used it extensively for many years, in both commercial and open source routers.
 
 Although this standard is not recommended anymore\cite{ripe recommendations}
 in today's routers, we wanted to implement it for the Bird Routing
 Project\cite{bird}, hoping that it will serve as a good basis for
-future possible improvements and extension of this RFC. There exist
+future possible improvements and extensions to this RFC. There exist
 many variants of the Route Flap Damping alorithm and the community
 has not lost its interest in finding robust mechanisms that could
 allow BGP to be more resilient. 
