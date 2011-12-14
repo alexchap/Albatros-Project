@@ -2,13 +2,13 @@ Directory structure
 
 - bird : official bird, not modified
 - bird/compiled : idem but compiled version
-- conf-bird : configuration files for official bird daemon
 
 - ourbird : our modified bird
 - ourbird/compiled : idem but compiled version
-- conf-ourbird : configuration files for our bird setup (with damping)
 
+- conf-bird : configuration files 
 - log-dbg : log and debug files storage
+- stats : stats collected
 - socket : bird unix sockets -> access via birdc
 
 - mdfmt : feeder program (python)
@@ -17,10 +17,12 @@ Directory structure
 
 Scripts
 
-- start_bird.sh : start traditional bird with the topology
-- start_ourbird.sh : start our bird with the topology, and route damping ON
-- reset_all.sh : clean the logs, kill the daemons
+- start_bird.sh : start all bird routers 
+- reset_all.sh : clean the logs, save current stats in tarball and  kill the daemons
+- start_feeder.sh : start a feeder for a router. This script is called from start_bird.sh
+- start_collector.sh : start a stat collector for a router. Called from start_bird.sh
 
 Files
 
 - eval-topo.ppt : the topology overview
+- last_stats.tar.gz : last stats that have been collected

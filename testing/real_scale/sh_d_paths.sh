@@ -1,6 +1,6 @@
 #!/bin/sh
-
-sudo birdc -s /usr/local/var/run/bird_rta.ctl <<FOO
-sh dampened paths "bgp*"
+i=10;
+bird/compiled/sbin/birdc -s sockets/bird-"$i".ctl <<FOO
+sh protocols all "bgp*"
 quit
-FOO > out
+FOO > out | egrep -A 4 'Route change stats'
