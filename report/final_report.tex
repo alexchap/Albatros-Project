@@ -13,9 +13,7 @@
 
 \date{December 2011}
 
-
 \author{Alexandre Chappuis, Bastian Marquis and David Klopfenstein @ EPFL.ch}
-
 
 \title{Implementation of a BGP Route Flap Damping Algorithm for the Bird
 Routing Project}
@@ -26,9 +24,14 @@ Today's Internet stability strongly relies on the good behavior of
 dynamic routing protocols such as BGP (Border Gateway Protocol),
 that enables routing between Autonomous Systems. Route flapping is
 a well-known and undesirable phenomena occuring in both commercial
-and private networks. In this report, we carefully explain our implementation
+and private networks. In this report, we explain our implementation
 of the RFC 2439, BGP Route Flap Damping, for one famous open source
 routing software suite, the Bird Routing Project.
+
+\par
+
+We also present results of an experiment where we compared the number of
+BGP updates sent with and without route damping enabled, in a setup where only one of the bgp router was receiving advertisments for flapping routes.
 
 \end{abstract}
 
@@ -72,13 +75,19 @@ As soon as the figure of merit goes below a \textit{reuse threshold}, the route 
 
 The figure of merits decays exponentially over time.
 Exponential decay has several advantages : it can be implemented very efficiently using precomputed \textit{decay arrays}.
-Also, using exponential decay, the figure of merit keeps trace of previous instabilities for a fairly long time : old instabilities become less and less important over time, while newer ones have more weight.
+Also, with exponential decay, the figure of merit keeps trace of previous instabilities for a fairly long time : old instabilities become less and less important over time, while newer ones have more weight.
 
-Network administrators have lots of freedom in choosing the behavior of the penalty term : they can control the half-life of the penalty term, its maximum value (thus controlling the maximum time a route can be damped) and both the reuse and cut thresholds.
+Network administrators have lots of freedom in choosing the behavior of the penalty term : they can control the half-life of the penalty term, its maximum value (thus controlling the maximum time a route can be suppressed) and both the reuse and cut thresholds.
 
-Here is an example showing how the figure of merit evolve over time.
-The route flapped four times before exceeding the \textit{cut threshold}.
-It then remained stable.
+Here is an example showing how the figure of merit evolves over time (the illustration comes from \cite{damping-pic}).
+The route flaps three times, exceeding the cut threshold only after the third flap.
+The route is reused as soon as its penalty term goes below the reuse limit.
+
+\begin{center}
+\includegraphics[scale=.5]{route_damping.png}
+\end{center}
+
+Penalty terms are re-computed at regular time intervals using timers. Also, every time an update for a route is received, the penalty term for that route is re-computed.
 
 The RFC proposes several optimizations to decrease processing time, at the cost of a slightly bigger memory footprint.
 \textit{E.g. reuse lists} are used to not have to recompute the figure of merit of all routes : damped routes with similar penalty terms are grouped together in a same reuse list.
@@ -140,7 +149,7 @@ real scale tests
 
 
 \section{Acknowledgement}
-\begin{thebibliography}{4}
+\begin{thebibliography}{5}
 \bibitem[1]{rfc2439}The RFC 2439, BGP Route Flap Damping, \href{http://www.ietf.org/rfc/rfc2439.txt}{http://www.ietf.org/rfc/rfc2439.txt}
 
 \bibitem[2]{ripe recommendations} RIPE Recommendations On Route-flap
@@ -149,6 +158,8 @@ Damping, \href{http://www.ripe.net/ripe/docs/ripe-378}{http://www.ripe.net/ripe/
 \bibitem[3]{bird}Bird Routing Project, \href{http://bird.network.cz}{http://bird.network.cz}
 
 \bibitem[4]{repository}Our publicly available repository, \href{https://github.com/alexchap/Albatros-Project}{https://github.com/alexchap/Albatros-Project}
+
+\bibitem[5]{damping-pic}itcertnotes, \href{www.itcertnotes.com}{http://www.itcertnotes.com}
 \end{thebibliography}
 
 \end{document}
