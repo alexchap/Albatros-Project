@@ -14,14 +14,14 @@ CONF_PREFIX='/opt/acnds_11_2/conf-bird/bird.10.0.0.';
 CONF_SUFFIX='.conf';
 DBG_PREFIX='/opt/acnds_11_2/log-dbg/bird-rt-';
 DBG_SUFFIX='.debug';
-SOCKET_PREFIX='/usr/local/var/run/'"$RT_PREFIX";
+SOCKET_PREFIX='/opt/acnds_11_2/sockets/bird-'"$RT_PREFIX";
 SOCKET_SUFFIX='.c';
 
 # Loop over all 27 nodes and start bird
 
-for i in 1..27
+for i in `seq 1 27`
 do
-
+echo "Starting router $i"
 $BIRD -c "$CONF_PREFIX""$i""$CONF_SUFFIX" -s  "$SOCKET_PREFIX""$i""$SOCKET_SUFFIX" -D  "$DBG_PREFIX""$i""$DBG_SUFFIX" &
 
 done
