@@ -18,6 +18,7 @@
 struct protocol;
 struct slist;
 struct bgp_conn;
+struct bgp_proto;
 struct net;
 
 /* Per BGP instance configuration */

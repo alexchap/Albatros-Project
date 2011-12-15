@@ -101,15 +101,15 @@ void damping_config_init(struct damping_config *dcf)
   if (max_ratio > t)
     max_ratio = t;
 
-  dcf->reuse_lists = cfg_alloc(N_REUSE_LISTS * sizeof(list));
-  dcf->reuse_lists_index = cfg_alloc(N_REUSE_LISTS * sizeof(int));
-  dcf->reuse_scale_factor = (double)(N_REUSE_LISTS / (max_ratio - 1));
+  dcf->reuse_lists        = cfg_alloc(N_REUSE_LISTS * sizeof(slist));
+  dcf->reuse_lists_index  = cfg_alloc(N_REUSE_LISTS * sizeof(int));
+  dcf->reuse_scale_factor = ((double)N_REUSE_LISTS / (max_ratio - 1));
 
   for (i = 0; i < N_REUSE_LISTS; ++i)
     {
-      dcf->reuse_lists_index[i] = (int)((dcf->half_time / DELTA_T_REUSE) *
-                                        log(1.0 / (dcf->reuse_threshold * (1 + (i / dcf->reuse_scale_factor)))
-                                            / log(0.5)));
+      dcf->reuse_lists_index[i] = (int)(((double)dcf->half_time / DELTA_T_REUSE) *
+					log(1.0 / ((double)dcf->reuse_threshold * (1.0 + ((double)i / dcf->reuse_scale_factor)))) / log(0.5));
+
       s_init_list(dcf->reuse_lists + i);
     }
   dcf->reuse_list_current_offset = 0;
@@ -145,7 +145,7 @@ static inline int is_suppressed(damping_info *info)
   return (info->current_reuse_list != NULL);
 }
 
-static int get_reuse_list_index(int penalty,struct damping_config *dcf)
+static int get_reuse_list_index(int penalty, struct damping_config *dcf)
 {
   double r = ((double)penalty / dcf->cut_threshold) - 1.0;
   int index = r * dcf->reuse_scale_factor;
