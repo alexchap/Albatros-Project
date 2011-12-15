@@ -187,8 +187,8 @@ void damping_reuse_timer_handler(struct timer* t)
   snode *n, *nxt;
   rte *tmp_rte;
   struct bgp_proto *p;
-  struct proto *pro = &(p->p);
-  struct proto_stats *stats = &(pro->stats);
+  struct proto *pro;
+  struct proto_stats *stats;
 
   // make a copy of the list's head so that it can be reinitialized without
   // losing all informations
