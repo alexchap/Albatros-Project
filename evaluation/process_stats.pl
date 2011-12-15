@@ -19,7 +19,7 @@ my $STAT_SUFFIX     = ".stat";
 my $STAT_DIR        = "./stats/";
 my $OUT_DIR         = "./processed/";
 my $OUT_FILE_PREFIX = $STAT_PREFIX;
-my $OUT_FILE_SUFFIX = ".processed";
+my $OUT_FILE_SUFFIX = ".dat";
 
 # process stats for each router
 foreach my $j ( 1 .. 27 ) {
