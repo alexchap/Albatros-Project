@@ -3,9 +3,9 @@
 # This script kills all bird instances and delete all 
 # log and debugging files
 echo "Kill daemons"
+pkill -9 start_feeder.sh 
 pkill bird
 pkill python
-pkill -9 start_feeder.sh 
 
 echo "Killing collectors"
 pkill start_collector

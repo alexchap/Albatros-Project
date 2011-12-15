@@ -26,6 +26,9 @@ foreach my $j ( 1 .. 27 ) {
     process_stats_router($j);
 }
 
+
+################### Useful functions #################################
+
 # Function that create stats per router and saves them to disk
 sub process_stats_router {
 

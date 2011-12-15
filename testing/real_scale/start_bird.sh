@@ -32,17 +32,17 @@ do
   fi
 
   # start node i
-  echo "Starting router $i"
   SOCKET="$SOCKET_PREFIX""$i""$SOCKET_SUFFIX"
+  echo "Starting router $i"
   $BIRD -c "$CONF_PREFIX""$i""$CONF_SUFFIX" -s "$SOCKET" -D  "$DBG_PREFIX""$i""$DBG_SUFFIX" &
 
   # start stat_collector for node i
   echo "Starting collector $i"
   ./start_collector.sh "$i" "$DAMP" "$SOCKET" &
-
 done
 
 # Start feeder (node with ip 10.0.0.3)
 echo "Feeder will start in 10 seconds"
 sleep 10
-./start_feeder.sh &
+./start_feeder.sh & #>& /opt/acnds_11_2/log-dbg/feeder.log &
+
