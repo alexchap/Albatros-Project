@@ -4,6 +4,8 @@ Status : 15th December 2011
 
 Priorities
 
+- make sure stats in show protocols all match output of sh dampened paths
+
 - damping.c : Fix ambiguity with variable names proto vs. p
 - FIX compilation problem when no damping -> can we define a conditional grammar in config.Y ?
   i.e if route damping is disabled, no need to create damping_config !
