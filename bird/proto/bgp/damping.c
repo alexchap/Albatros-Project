@@ -39,7 +39,7 @@
 
 #include <math.h>
 #include <assert.h>
-#include <stdio.h>
+
 #include "nest/bird.h"
 #include "lib/timer.h"
 #include "nest/cli.h"
@@ -54,8 +54,6 @@
 #define log_tmp log
 #undef log
 #endif
-
-FILE *f;
 
 /**
  * A new damping configuration is allocated for the BGP instance
@@ -85,7 +83,6 @@ void damping_config_init(struct damping_config *dcf)
 
   int i;
   double max_ratio, t;
-  f = fopen("/home/bkm/log.txt", "w");
 
   dcf->ceiling = (int) ((double)dcf->reuse_threshold * exp((double)dcf->tmax_hold / dcf->half_time) * log(2.0));
 
@@ -219,9 +216,6 @@ void damping_reuse_timer_handler(struct timer* t)
 
     info->figure_of_merit = get_new_figure_of_merit(info, now,dcf);
 
-	fprintf(f, "%d %d\n", now, info->figure_of_merit);
-	fflush(f);
-
     DBG("%d\n", info->figure_of_merit);
     info->last_time_updated = now;
 
@@ -248,7 +242,7 @@ void damping_reuse_timer_handler(struct timer* t)
 /* RFC 2439 §4.8.2 */
 void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int pxlen)
 {
-  DBG("BGP:Damping: damping_remove_route for prefix %I/%d\n",*addr,pxlen);
+  DBG("BGP:Damping: damping_remove_route for prefix %I/%d\n", *addr, pxlen);
   damping_info *info          = fib_get(&proto->damping_info_fib, addr, pxlen);
   struct damping_config *dcf  = proto->cf->dcf;
   struct bgp_conn *connection = proto->conn;
@@ -277,7 +271,7 @@ void damping_remove_route(struct bgp_proto *proto, net *n, ip_addr *addr, int px
       rte_update(connection->bgp->p.table,
                  n, &(connection->bgp->p),
                  &(connection->bgp->p), NULL);
-      DBG("BGP:Damping: New alloc for prefix %I/%d that is withdrawn\n",*addr,pxlen);
+      DBG("BGP:Damping: New alloc for prefix %I/%d that is withdrawn\n", *addr, pxlen);
       return;
     }
 
