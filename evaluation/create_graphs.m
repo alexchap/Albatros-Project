@@ -5,6 +5,8 @@ function [] = create_graphs()
 PROCESSED_PREFIX = './processed/stats-rt-';
 PROCESSED_SUFFIX = '.dat';
 
+mkdir('./img/');
+
 data = {}; % stores the data for each router
 % for each item in data, we have 3 rows: the number of import updates
 % received, the number of import withdraws received and the number of
@@ -82,7 +84,9 @@ for k=1:11
     title(sprintf('Evolution of %s',label));
 end
 legends{find(indices==11)}='Total network';
-legend(legends,'Location','NorthWest');
+legend(legends,'Location','NorthEast');
 hold off
 
+img_name = sprintf('./img/%s.png',label);
+saveas(gcf,img_name,'png');
 end
