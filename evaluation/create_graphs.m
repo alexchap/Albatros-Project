@@ -1,3 +1,6 @@
+
+% TODO: different line styles for different curves
+
 function [] = create_graphs()
 
 % This script generate the graphs for the evaluations
@@ -53,14 +56,16 @@ end
 end
 
 function [ ]= myplot(data, m, label)
-% TODO: reduce end of data when it remains constant
 
-time = 10*(1:length(data{1}));
+[first_index last_index] = find_boundaries(data,m);
+
+time = 10*(1:(last_index-first_index+1));
 cc=hsv(11);
 
 figure(m);
 hold on;
 legends={};
+
 
 % find order in which we have to display elements
 % and total
@@ -77,16 +82,43 @@ data{11}=total;
 [val indices] = sort(order,'descend');
 
 for k=1:11
-    plot(time,data{indices(k)}(m,:),'color',cc(k,:));
+    plot(time,data{indices(k)}(m,first_index:last_index),'color',cc(k,:));
     ylabel(sprintf('Number of %s',label));
     xlabel('Time [s]');
     legends{k} = sprintf('AS %d',indices(k));
     title(sprintf('Evolution of %s',label));
 end
-legends{find(indices==11)}='Total network';
-legend(legends,'Location','NorthEast');
+legends{find(indices==11)}='Total';
+legend(legends,'Location','NorthWest');
 hold off
 
 img_name = sprintf('./img/%s.png',label);
 saveas(gcf,img_name,'png');
+disp(sprintf('Image saved to %s',img_name));
+end
+
+
+
+function [first_index last_index] = find_boundaries(data,m)
+% find start and end of data. start = given by router 3 (first non zero
+% val) and end = when sum remains constant
+firsts = zeros(1,10);
+lasts = zeros(1,10);
+for k=1:10
+    pos1 = find(data{k}(m,:)>0,1);
+    if (isempty(pos1))
+       firsts(k)=length(data{k}(m,:)); 
+    else
+       firsts(k)=pos1;
+    end
+    pos2 = find(data{k}(m,:)==max(data{k}(m,:)),1);
+     if (isempty(pos2))
+       lasts(k)=0; 
+    else
+       lasts(k)=pos2;
+    end
+end
+first_index = min(firsts);
+last_index = max(lasts);
+
 end
