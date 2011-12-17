@@ -1,3 +1,6 @@
 SIM1 : no damping activated
-SIM2 : damping activated with default params
-SIM3 : 
+SIM2 : damping activated on router 3 (feeder) with default params
+SIM3 : damping activated on router 3 (feeder) and cut_threshold = 1000
+
+
+All images and stats include all updates & withdraws in the network, whethere they are coming from the outside world or not !

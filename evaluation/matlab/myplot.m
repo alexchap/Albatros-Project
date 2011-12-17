@@ -18,8 +18,12 @@ time = 10*(1:(last_index-first_index+1));
 cc=hsv(length(data)+1);
 
 figure();
-hold on;
+
+hold all;
 legends={};
+
+linestyles = cellstr(char('-',':','-.','--','-',':','-.','--','-',':','-',':',...
+'-.','--','-',':','-.','--','-',':','-.'));
 
 
 % find order in which we have to display elements
@@ -38,17 +42,19 @@ if(display_sum)
 end
 
 [val indices] = sort(order,'descend');
-
-for k=1:(length(data))
-    plot(time,data{indices(k)}(m,first_index:last_index),'color',cc(k,:));
+indices = uint32(indices);
+n=1; % keep iteration
+for k=transpose(indices)
+    plot(time,data{k}(m,first_index:last_index),[linestyles{n}],'color',cc(n,:));
     ylabel(label);
     xlabel('Time [s]');
     if(strcmp(legend_label,'Router 3')==1)
-       legends{k} = legend_label; % special case for damping only
+       legends{n} = legend_label; % special case for damping only
     else
-     legends{k} = sprintf('%s %d',legend_label,indices(k));
+     legends{n} = sprintf('%s %d',legend_label,k);
     end
     title(mytitle);
+    n=n+1;
 end
 
 if(display_sum)
@@ -58,7 +64,7 @@ end
 legend(legends,'Location','NorthWest');
 hold off
 
-img_name = sprintf('../img/%s.png',mytitle);
-saveas(gcf,img_name,'png');
+img_name = sprintf('../img/%s.eps',mytitle);
+saveas(gcf,img_name,'eps');
 disp(sprintf('Image saved to %s',img_name));
 end

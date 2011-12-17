@@ -3,9 +3,24 @@
 \begin_document
 \begin_header
 \textclass IEEEtran
-\use_default_options true
+\begin_preamble
+
+
+\usepackage{babel}
+
+\usepackage[unicode=true, pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]{hyperref}
+
+\makeatother
+
+\makeatother
+
+\usepackage{babel}
+\end_preamble
+\use_default_options false
 \language english
-\inputencoding auto
+\inputencoding latin9
 \font_roman default
 \font_sans default
 \font_typewriter default
@@ -56,14 +71,21 @@ Implementation of a BGP Route Flap Damping Algorithm for the Bird Routing
 \end_layout
 
 \begin_layout Abstract
-Today's Internet stability strongly relies on the well behavior of dynamic
- routing protocols such as BGP, the Border Gateway Protocol, that enables
- routing between Autonomous Systems.
- Route flapping is a well-known and undesired phenomena that occurs in both
+Today's Internet stability strongly relies on the good behavior of dynamic
+ routing protocols such as BGP (Border Gateway Protocol), that enables routing
+ between Autonomous Systems.
+ Route flapping is a well-known and undesirable phenomenon occuring in both
  commercial and private networks.
- In this report, we carefully explain our implementation of the RFC 2439,
- BGP Route Flap Damping, for one famous open source routing software suite,
- the Bird Routing Project.
+ In this report, we explain our implementation of the RFC 2439, BGP Route
+ Flap Damping, for one famous Open Source routing software suite, the Bird
+ Routing Project.
+\end_layout
+
+\begin_layout Abstract
+We also present results of an experiment where we compared the number of
+ BGP updates sent with and without route damping enabled, in a setup where
+ only one of the bgp router was receiving advertisments for flapping routes.
+ 
 \end_layout
 
 \begin_layout Section
@@ -72,33 +94,37 @@ Introduction
 
 \begin_layout Standard
 The inter-domain routing protocol BGP is still surviving to the gigantic
- growth of the Internet that has started in the last decade.
- Many applications used by millions of internet users, such as Skype, suffer
- however from some weaknesses of that protocol.
- The main problems are twofolds: Firstly, BGP has a pretty slow convergence,
+ growth of the Internet that started during the last decade.
+ However, some widely used applications, such as Skype, still suffer from
+ weaknesses of that protocol.
+ The main problems are twofolds: Firstly, BGP has a slow convergence rate,
  meaning that a change at one location takes quite some time to be propagated
- throughout the network.
+ to the other ends of the network.
  Secondly, if a node becomes unstable, for example if its connectivity constantl
 y comes up and down, it will have bad consequences on the network, both
- in terms of useless processing at routers and unnecessary routing traffic.
- Routes that are advertised and withdrawns at regular interval of times
- are said to be flapping.
+ in terms of useless processing at BGP routers and unnecessary routing traffic.
+ Routes advertised and withdrawn at regular interval of time are said to
+ be 
+\shape italic
+flapping
+\shape default
+.
 \end_layout
 
 \begin_layout Standard
-Many approaches dealing with the flapping behavior do exist since the late
+Many approaches to counter route flapping have been developped in the late
  90's.
- The RFC 2439
+ RFC 2439
 \begin_inset CommandInset citation
 LatexCommand cite
 key "rfc2439"
 
 \end_inset
 
- was the first standard proposed so that routers could inhibit the propagation
- of bad-behaving routes, until they become stable again.
- People have used it extensively for many years, in both commercial and
- open source routers.
+ standardized one such approach : it basically blocks updates from flapping
+ routes, and does so until the routes are deemed stable again.
+ This RFC has been used it extensively for many years, in both commercial
+ and open source routers.
 \end_layout
 
 \begin_layout Standard
@@ -117,11 +143,10 @@ key "bird"
 \end_inset
 
 , hoping that it will serve as a good basis for future possible improvements
- and extension of this RFC.
+ and extensions to this RFC.
  There exist many variants of the Route Flap Damping alorithm and the community
  has not lost its interest in finding robust mechanisms that could allow
  BGP to be more resilient.
- 
 \end_layout
 
 \begin_layout Section
@@ -129,9 +154,99 @@ Overview
 \end_layout
 
 \begin_layout Standard
-picture of penalty evolution here and basic explanations.
- talk about thresholds used.
- talk about bird -> C + flexible +...
+RFC 2349 seeks to limit the impact of route flapping by 
+\begin_inset Quotes eld
+\end_inset
+
+damping
+\begin_inset Quotes erd
+\end_inset
+
+ (
+\shape italic
+i.e.
+
+\shape default
+ ignoring packets of) missbehaving routes.
+ The solution must be able to distinguish flapping routes from good routes,
+ consume few resources, both in terms of memory usage and process time.
+ The RFC solves these problems by assigning each route a penalty term.
+ Whenever this penalty term for a given route reaches a certain threshold,
+ further advertisements for that route are ignored.
+ This penalty term varies over time : it is increased when the route becomes
+ unreachable and decays as long as the route stays stable.
+ As soon as the figure of merit goes below a 
+\shape italic
+reuse threshold
+\shape default
+, the route can be used again.
+\end_layout
+
+\begin_layout Standard
+The figure of merits decays exponentially over time.
+ Exponential decay has several advantages : it can be implemented very efficient
+ly using precomputed 
+\shape italic
+decay arrays
+\shape default
+.
+ Also, with exponential decay, the figure of merit keeps trace of previous
+ instabilities for a fairly long time : old instabilities become less and
+ less important over time, while newer ones have more weight.
+\end_layout
+
+\begin_layout Standard
+Network administrators have lots of freedom in choosing the behavior of
+ the penalty term : they can control the half-life of the penalty term,
+ its maximum value (thus controlling the maximum time a route can be suppressed)
+ and both the reuse and cut thresholds.
+\end_layout
+
+\begin_layout Standard
+Here is an example showing how the figure of merit evolves over time (the
+ illustration comes from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "damping-pic"
+
+\end_inset
+
+).
+ The route flaps three times, exceeding the cut threshold only after the
+ third flap.
+ The route is reused as soon as its penalty term goes below the reuse limit.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename route_damping.eps
+	scale 50
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Penalty terms are re-computed at regular time intervals using timers.
+ Also, every time an update for a route is received, the penalty term for
+ that route is re-computed.
+\end_layout
+
+\begin_layout Standard
+The RFC proposes several optimizations to decrease processing time, at the
+ cost of a slightly bigger memory footprint.
+ 
+\shape italic
+E.g.
+ reuse lists
+\shape default
+ are used to not have to recompute the figure of merit of all routes : damped
+ routes with similar penalty terms are grouped together in a same reuse
+ list.
+ Penalty terms of the routes in a given reuse list are then re-computed
+ only when necessary.
 \end_layout
 
 \begin_layout Section
@@ -173,36 +288,169 @@ Miscellaneous
 Evaluation
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Topology used for our simulation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
-Small scale
+Overview
 \end_layout
 
 \begin_layout Standard
-1 router with ca.
- 10 neighbors -> topology 3
-\end_layout
+We used a topology of 27 routers in the NSL cluster in order to evaluate
+ our implementation.
+ This topology consits of 10 Autonomous systems.
+ Router number 3 with network prefix 10.0.0.3/24 was the the one that fed the
+ whole network 10.0.0.0/24 with updates coming from one MRT dump archive (updates.20
+100401.1729), that we got from the Route Views project
+\begin_inset CommandInset citation
+LatexCommand cite
+key "routeviews"
 
-\begin_layout Subsection
-30 BGP routers in NSL cluster
+\end_inset
+
+.
+ This archive corresponds to 15 minutes of real BGP traffic that were sent
+ by 11 BGP routers.
+ The topology used is represented in figure x.
 \end_layout
 
 \begin_layout Standard
-what we're going to need :
+We ran 3 simulations and recorded every 10 seconds the total number of updates
+ and withrawals received from all neighbors for all routers.
+ When route damping was enabled, we also recorded the number of route dampened
+ at any given time.
+ 
 \end_layout
 
-\begin_layout Itemize
-numer of route damped for each bgp proto vs.
- number of diff.
- routes advertised/withdrawn => show there are less updates and unnecessary
- traffic when damping = activated
+\begin_layout Enumerate
+The first simulation was made without route damping and with the official
+ bird daemon....
+ 
 \end_layout
 
-\begin_layout Itemize
-do it with different parameters ?
+\begin_layout Enumerate
+The seconds was made with our bird implementation and default damping parameters....
+ 
 \end_layout
 
-\begin_layout Itemize
-convergence time not affected ?
+\begin_layout Enumerate
+The third was the same as the second, except for the cut_threshold parameters
+ that was set to 1000 instead of 1500....
+ 
+\end_layout
+
+\begin_layout Subsection
+Evolution of dampened paths
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Evolution of dampened paths for Simulation 3
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+it represent time vs.
+ the actual number of dampened routes in AS2 (actually, router 3)
+\end_layout
+
+\begin_layout Standard
+also note that we aggregated results for each AS (for better readability)
+\end_layout
+
+\begin_layout Subsection
+Number of route updates
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Difference of import updates between simulations 1 and 3
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+it's the difference between graph sim1 and graph sim3 -> i.e we have less
+ updates in SIM3 ! :-)
+\end_layout
+
+\begin_layout Standard
+maybe we can also display one graph with the evolution -> show that the
+ number is quite huge !! and that's why we show the difference rather than
+ the two graph on top of each other !
+\end_layout
+
+\begin_layout Subsection
+Number of withdrawals
+\end_layout
+
+\begin_layout Standard
+works for sim3, not for sim2 !
 \end_layout
 
 \begin_layout Section
@@ -238,9 +486,26 @@ key "rfc2439"
 \end_inset
 
 The RFC 2439, BGP Route Flap Damping, 
-\begin_inset CommandInset href
-LatexCommand href
-target "http://www.ietf.org/rfc/rfc2439.txt"
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{http://www.ietf.org/rfc/rfc2439.txt}{
+\end_layout
+
+\end_inset
+
+http://www.ietf.org/rfc/rfc2439.txt
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
@@ -256,9 +521,26 @@ key "ripe recommendations"
 \end_inset
 
  RIPE Recommendations On Route-flap Damping, 
-\begin_inset CommandInset href
-LatexCommand href
-target "http://www.ripe.net/ripe/docs/ripe-378"
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{http://www.ripe.net/ripe/docs/ripe-378}{
+\end_layout
+
+\end_inset
+
+http://www.ripe.net/ripe/docs/ripe-378
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
@@ -274,9 +556,26 @@ key "bird"
 \end_inset
 
 Bird Routing Project, 
-\begin_inset CommandInset href
-LatexCommand href
-target "http://bird.network.cz"
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{http://bird.network.cz}{
+\end_layout
+
+\end_inset
+
+http://bird.network.cz
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
@@ -292,13 +591,100 @@ key "repository"
 \end_inset
 
 Our publicly available repository, 
-\begin_inset CommandInset href
-LatexCommand href
-target "https://github.com/alexchap/Albatros-Project"
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{https://github.com/alexchap/Albatros-Project}{
+\end_layout
+
+\end_inset
+
+https://github.com/alexchap/Albatros-Project
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "5"
+key "damping-pic"
+
+\end_inset
+
+itcertnotes, 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{www.itcertnotes.com}{
+\end_layout
+
+\end_inset
+
+http://www.itcertnotes.com
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "6"
+key "routeviews"
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{http://routeviews.org}{
+\end_layout
+
+\end_inset
+
+http://routeviews.org
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
 \end_layout
 
 \end_body

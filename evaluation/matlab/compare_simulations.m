@@ -4,7 +4,7 @@
 % ASSUMPTION : simulation 2 has lower updates/withdraws !
 
 data1 = get_data('../SIM1');
-data2 = get_data('../SIM2');
+data2 = get_data('../SIM3');
 
 data1_as = aggregate_as(data1);
 data2_as = aggregate_as(data2);
@@ -24,11 +24,11 @@ for k=1:length(data1_as)
 
 end
 
-mytitle1='Difference of import updates received between SIM1 and SIM2';
-mytitle2='Difference of import withdraws received between SIM1 and SIM2';
+mytitle1='Difference of import updates received between SIM1 and SIM3';
+mytitle2='Difference of import withdraws received between SIM1 and SIM3';
 
 
-myplot(diff,1,'Import updates received (SIM1 - SIM2)','AS ',mytitle1, 1);
-myplot(diff,2,'Import withdraws received (SIM1 - SIM2)','AS ',mytitle2, 1);
+myplot(diff,1,'Import updates received (SIM1 - SIM3)','AS ',mytitle1, 1);
+myplot(diff,2,'Import withdraws received (SIM1 - SIM3)','AS ',mytitle2, 1);
 
 

@@ -1,3 +1,8 @@
-#! /bin/sh
+#! /usr/bin/perl
 
-for i in `git status | grep deleted | awk '{printf "%s\n",$3 }'`; do git rm $i; done
+my @deleted = `git ls-files -d`;
+foreach my $elem (@deleted) {
+chomp $elem;
+print $elem."\n";
+`git rm '$elem'`;
+}
