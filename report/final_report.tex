@@ -217,8 +217,8 @@ other parameters.
 
 Our implementation sticks to the RFC regarding route flapping detection.
 Hooks were added in the BGP module of BIRD for that purpose.
-Those hooks ensure that the {\tt\small damping\_add\_route} and {\tt\small damping\_remove\_route} functions get
-called as routes are advertised/withdrawn respectively.
+Those hooks ensure that the {\tt\small damping\_add\_route} or {\tt\small damping\_remove\_route} functions are 
+called when routes are advertised or withdrawn, respectively.
 
 As those functions are similar to their equivalent in the RFC, only the relevant implementation details are covered here.
 Please refer to the RFC for additional details.
