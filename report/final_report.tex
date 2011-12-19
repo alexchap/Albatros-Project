@@ -69,9 +69,9 @@ allow BGP to be more resilient.
 
 \section{Overview}
 
-RFC 2349 seeks to limit the impact of route flapping by {}``damping''
+RFC 2349 seeks to limit the impact of route flapping by ``damping''
 (\textit{i.e.} ignoring packets of) missbehaving routes. The solution
-must be able to distinguish flapping routes from good routes, consume
+must be able to distinguish flapping routes from good routes and consume
 few resources, both in terms of memory usage and process time. The
 RFC solves these problems by assigning each route a penalty term.
 Whenever this penalty term for a given route reaches a certain threshold,
@@ -139,7 +139,7 @@ The data structures used by the implementation are very close to those described
 in the RFC (\S4.4, \textit{Run Time Data Structures}).
 The most important of which are certainly {\tt\small damping\_config} and
 {\tt\small damping\_info}.
-Their definitions can be bound in {\sl damping.h}.
+Their definitions can be found in {\sl damping.h}.
 
 {\tt\small damping\_config} groups all configurations parameters for a BGP peer.
 This allows network administrators to have different sets of parameters for
@@ -154,13 +154,15 @@ The former speeds up the computation of new figure of merits by pre-computing a 
 of (costy) exponentials and using them when figures of merit needs to be updated.
 The latter limitates the time of computation at every timer tick by grouping damped routes
 according to their penalty term.
-The penalty terms of a group of routes are updated every $n$ ticks, where $n$ is the number of
-reuse lists, instead of being updated at every tick.
+Instead of being updated at every tick, a group of routes is updated once every $n$ ticks, 
+where $n$ is the number of reuse lists.
 Reuse lists are implemented using \texttt{\small slist}s, a doubly linked list implementation provided by BIRD.
 
 BIRD's timer are used to regularly update the penalty terms of routes : every \texttt{\small bgp\_proto} structure
 contains a \texttt{\small reuse\_list\_timer}.
 These timers are set up to call \texttt{\small damping\_reuse\_timer\_handler} at every tick.
+This function is responsible for updating the penalty terms of damped routes and re-inserting damped routes
+into the routing table if their penalty term is low enough.
 
 The core of the damping algorithm lies with the \texttt{\small damping\_info} structure.
 The penalty term is stored in that structure, along with a timestamp indicating when the last
@@ -171,8 +173,6 @@ One such structure is allocated once a route starts to flap, and is de-allocated
 There is a one-to-one mapping between routes (\texttt{\small rte} in BIRD) and \texttt{\small damping\_info}.
 This mapping was made possible by FIBs, an hash table implementation provided by BIRD's API.
 FIBs basically map IP prefixes to any other data structure, {\tt\small damping\_info}s in our case.
-This is an important implementation detail : this hash table establishes a link between routes (\textit{i.e.} IP prefix + {\tt\small bgp\_proto})
-and {\tt\small damping\_info}.
 
 Last but not least, the fact that BIRD uses only one thread made our job much simpler as we didn't have to worry about concurrency.
 
