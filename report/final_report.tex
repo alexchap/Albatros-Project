@@ -128,7 +128,8 @@ Several parts of BIRD had to be modified for the implementation of route damping
 The configuration file parser had to be modified in order to correctly handle the parameters
 required by the RFC.
 Also, we had to make similar modifications to the command line parser so that suppressed routes
-could be listed.
+could be listed using the \texttt{\small show dampened paths} command.
+The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating whether a route is damped or not.
 Last but not least, we had to add hooks to BIRD's BGP implementation : whenever a route is added or withdrawn, our code is executed.
 Route damping is enabled at configure time by adding the {\tt\small -{}-enable-route-damping}
 switch.
@@ -205,6 +206,22 @@ protocol bgp bgp_config {
 }
 \end{verbatim}
 
+The default parameters (hard coded in \textsl{damping.h}) are :
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+\texttt{\small cut\_threshold} & 1500 \\
+\hline
+\texttt{\small cut\_threshold} & 750 \\
+\hline
+\texttt{\small half\_time} & 900 \\
+\hline
+\texttt{\small tmax\_hold} & 3000 \\
+\hline
+\end{tabular}
+\end{center}
+
 The {\tt\small route damping} parameters can be used to enable/disable route damping for a particular neighbour.
 All the other parameters used by the RFC (\textit{e.g.} decay arrays, scaling factor, ...) are derived from
 those four values.
@@ -212,6 +229,8 @@ those four values.
 BIRD uses Bison to parse the configuration files and we had to extend it to support the new set of keywords.
 Those parameters are passed to the {\tt\small damping\_config\_new} function, which allocates and initializes a new {\tt\small damping\_config} and computes the 
 other parameters.
+Finally, checks are made to ensure that the parameters are consistent with each other.
+\textit{E.g.} the \texttt{\small cut\_threshold} must be bigger than \texttt{\small reuse\_threshold}, and damping should be enabled only for E-BGP.
 
 \subsection{Detecting BGP Flapping}
 
@@ -225,6 +244,7 @@ Please refer to the RFC for additional details.
 
 When a route is removed for the first time, a new {\tt\small damping\_info} is allocated in a {\tt\small damping\_info\_fib}, and its penalty term is set to a default value.
 The penalty term of this route is updated as the route is re-advertised and removed again.
+In particular, when the route is removed, its penalty term is updated and then incremented by a default value : 1000, whereas when it is added, its penalty term is just updated.
 The penalty term is represented by a scaled integer, so that only the right level of precision is kept during execution.
 The main idea is that floating point operations are used when the figure of merit needs to be updated, but the result is stored as an integer (thus saving memory space).
 This usually results in an accidental loss of precision, except that in our case, the decrease in precision is controlled so as not to crash the application.
