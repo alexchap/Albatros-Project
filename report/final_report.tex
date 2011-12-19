@@ -1,25 +1,12 @@
-%% LyX 1.6.5 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
+
 \documentclass[a4paper,english]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{graphicx}
 
-\makeatletter
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
-
-
-\usepackage{babel}
-
 \usepackage[unicode=true, pdfusetitle,
  bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
  breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]{hyperref}
-
-\makeatother
-
-\makeatother
-
-\usepackage{babel}
 
 \makeatother
 
@@ -29,13 +16,13 @@
 
 \date{December 2011}
 
-
 \author{Alexandre Chappuis, Bastian Marquis and David Klopfenstein @ EPFL.ch}
-
 
 \title{Implementation of a BGP Route Flap Damping Algorithm for the Bird
 Routing Project}
+
 \maketitle
+
 \begin{abstract}
 Today's Internet stability strongly relies on the good behavior of
 dynamic routing protocols such as BGP (Border Gateway Protocol), that
@@ -130,39 +117,127 @@ list are then re-computed only when necessary.
 
 \section{Implementation}
 
-this part is kind of straightforward -> just explain how we did it
-with bird. cite coder's doc + github rep. of code
+Our implementation contains most of the data structure definitions
+and functions needed for the route damping algorithm (RFC 2439).
+As the RFC leaves little freedom regarding the implementation and the 
+design of the data structures, our implementation closely matches the RFC.
+The code, along with the list of commits, is publicly available on
+{\tt\small https://github.com/alexchap/Albatros-Project}.
 
+Several parts of BIRD had to be modified for the implementation of route damping.
+The configuration file parser had to be modified in order to correctly handle the parameters
+required by the RFC.
+Also, we had to make similar modifications to the command line parser so that suppressed routes
+could be listed.
+Last but not least, we had to add hooks to BIRD's BGP implementation : whenever a route is added or withdrawn, our code is executed.
+Route damping is enabled at configure time by adding the {\tt\small -{}-enable-route-damping}
+switch.
 
 \subsection{Data structures}
 
+Data structure details and alternatives are explained in the RFC 2439,
+§4.4 (Run Time Data Structures). The main data structure of the implementation
+are damping\_config and damping\_info. They can be found in the file
+/bird/proto/bgp/damping.h.
 
-\subsection{Processing withdrawals}
+The damping\_config structure contains all the BGP configuration parameters
+values for one EBGP peer. For instance, this structure carries the
+values for the suppressed limit threshold or the reused limit one.
+The damping\_info is the structure associated to one route. Therefore,
+the figure of merit of the route can be found there as well as the
+last time when the penalty of the route has been updated.
 
+An other important structure is the hash table which memorize all
+the route of BGP, which name is damping\_info\_fib. This structure
+contains all damping\_info structure which has just been describe
+here on this subsection. Thus when all the routes must be display
+or only a subset of them, this structure damping\_info\_fib must be
+retrieved as for instance in the function show\_dampened\_paths in
+the file /bird/proto/bgp/damping.c:
 
-\subsection{Processing route advertisements}
+A last extremely used structure is the reuse list (reuse\_lists) which
+is carried by the damping\_config structure described here above.
+The reuse list stores the dampened routes, which are suppressed routes.
+It has been implemented in a extremely smart way to mimic the exponential
+decay of penalty as shown in section 2 (Overview). Instead of computing
+each new penalty value at each new step of the timer, the penalty
+of route is reviewed only when it could be potentially under the reuse
+threshold and thus, potentially considered as a no-flapping route.
+It means that the reuse list system mimics the exponential decay and
+tries to find the correct index of the list for each routes. For instance,
+a route with a high penalty value will have a more long exponential
+decay time before potentially reaching the reuse threshold. Such a
+route received a high index (or far from the threshold). It is why
+the index could also be seen as a distance metric based on a exponential
+curve.
 
+FIBs are provided by BIRD API and implement an hash table that maps IP prefixes to any other data structure, {\tt\small damping\_info}s in our case.
+This is an important implementation detail : this hash table indeed establishes a link between routes (\textit{i.e.} IP prefix + {\tt\small bgp\_proto})
+and {\tt\small damping\_info}. 
 
 \subsection{Configuration parameters}
 
+Our extended version of BIRD gives network administrators a set of four parameters to control the behaviour of route damping.
+In particular, {\tt\small cut\_threshold}, {\tt\small reuse\_threshold}, {\tt\small tmax\_hold} and {\tt\small half\_time} are all modifiable
+from the configuration file.
+Both {\tt\small tmax\_hold} and {\tt\small half\_time} are expressed in seconds.
+Here is an example of configuration :
 
-\subsection{Timers}
+\begin{verbatim}
+protocol bgp bgp_config {
+  descriptionl "BGP daemon";
+  debug all;
 
+  # Specific config for BGP
+  local as 65011;
+  source address 10.10.10.11;
+  multihop;
+  next hop self;
+  path metric 1;
+ 
+  # Route damping configuration
+  route damping;
+  cut_threshold 2500;
+  reuse_threshold 1000;
+  tmax_hold 3000;
+  half_time 900;
+}
+\end{verbatim}
 
-\subsection{Miscellaneous}
+The {\tt\small route damping} parameters can be used to enable/disable route damping for a particular neighbour.
+All the other parameters used by the RFC (\textit{e.g.} decay arrays, scaling factor, ...) are derived from
+those four values.
 
+BIRD uses Bison to parse the configuration files and we had to extend it to support the new set of keywords.
+Those parameters are passed to the {\tt\small damping\_config\_new} function, which allocates and initializes a new {\tt\small damping\_config} and computes the 
+other parameters.
+
+\subsection{Detecting BGP Flapping}
+
+Our implementation sticks to the RFC regarding route flapping detection.
+Hooks were added in the BGP module of BIRD for that purpose.
+Those hooks ensure that the {\tt\small damping\_add\_route} and {\tt\small damping\_remove\_route} functions get
+called as routes are advertised/withdrawn respectively.
+
+As those functions are similar to their equivalent in the RFC, only the relevant implementation details are covered here.
+Please refer to the RFC for additional details.
+
+When a route is removed for the first time, a new {\tt\small damping\_info} is allocated in a {\tt\small damping\_info\_fib}, and its penalty term is set to a default value.
+The penalty term of this route is updated as the route is re-advertised and removed again.
+The penalty term is represented by a scaled integer, so that only the right level of precision is kept during execution.
+The main idea is that floating point operations are used when the figure of merit needs to be updated, but the result is stored as an integer (thus saving memory space).
+This usually results in an accidental loss of precision, except that in our case, the decrease in precision is controlled so as not to crash the application.
+Penalty terms are all implicitely multiplied by 1000, implying that only three digits after the dot are kept.
+
+{\tt\small damping\_info} are de-allocated when the penalty gets smaller than {\tt\small reuse\_threshold} divided by two.
+The rationale being that when the penalty term gets much smaller than the {\tt\small reuse\_threshold} index, keeping the {\tt\small damping\_info} structure with a small figure of merit is equivalent to de-allocating it (in the worst ---very unlikely --- case, it will only add the cost of re-allocating a new {\tt\small damping\_info} structure).
 
 \section{Evaluation}
 
-%
 \begin{figure}
 \caption{Topology used for our simulation}
 
-
-
 \end{figure}
-
-
 
 \subsection{Overview}
 
@@ -190,14 +265,10 @@ parameters that was set to 1000 instead of 1500....
 
 \subsection{Evolution of dampened paths}
 
-%
 \begin{figure}
 \caption{Evolution of dampened paths for Simulation 3}
 
-
-
 \end{figure}
-
 
 it represent time vs. the actual number of dampened routes in AS2
 (actually, router 3)
@@ -207,11 +278,8 @@ also note that we aggregated results for each AS (for better readability)
 
 \subsection{Number of route updates}
 
-%
 \begin{figure}
 \caption{Difference of import updates between simulations 1 and 3}
-
-
 
 \end{figure}
 
@@ -242,7 +310,9 @@ real scale tests
 
 
 \section{Acknowledgement}
+
 \begin{thebibliography}{6}
+
 \bibitem[1]{rfc2439}The RFC 2439, BGP Route Flap Damping, \href{http://www.ietf.org/rfc/rfc2439.txt}{http://www.ietf.org/rfc/rfc2439.txt}
 
 \bibitem[2]{ripe recommendations} RIPE Recommendations On Route-flap
@@ -255,6 +325,7 @@ Damping, \href{http://www.ripe.net/ripe/docs/ripe-378}{http://www.ripe.net/ripe/
 \bibitem[5]{damping-pic}itcertnotes, \href{www.itcertnotes.com}{http://www.itcertnotes.com}
 
 \bibitem[6]{routeviews}\href{http://routeviews.org}{http://routeviews.org} 
+
 \end{thebibliography}
 
 \end{document}
