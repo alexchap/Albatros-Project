@@ -182,7 +182,7 @@ Last but not least, the fact that BIRD uses only one thread made our job much si
 Our extended version of BIRD gives network administrators a set of four parameters to control the behaviour of route damping.
 In particular, {\tt\small cut\_threshold}, {\tt\small reuse\_threshold}, {\tt\small tmax\_hold} and {\tt\small half\_time} are all modifiable
 from the configuration file.
-Both {\tt\small tmax\_hold} and {\tt\small half\_time} are expressed in seconds.
+Both {\tt\small tmax\_hold} (the maximum time a route can be kept damped, it defines the ceiling value)  and {\tt\small half\_time} (the time taken by a penalty term to diminish by half its value) are expressed in seconds.
 Here is an example of configuration :
 
 \begin{verbatim}
