@@ -24,8 +24,8 @@ Routing Project}
 \maketitle
 
 \begin{abstract}
-Today's Internet stability strongly relies on the good behavior of
-dynamic routing protocols such as BGP (Border Gateway Protocol), that
+Today's Internet stability strongly relies on the good behaviour of
+dynamic routing protocols such as BGP (Border Gateway Protocol), which
 enables routing between Autonomous Systems. Route flapping is a well-known
 and undesirable phenomenon occuring in both commercial and private
 networks. In this report, we explain our implementation of the RFC
@@ -33,9 +33,9 @@ networks. In this report, we explain our implementation of the RFC
 suite, the Bird Routing Project.
 
 We also present results of an experiment where we compared the number
-of BGP updates sent with and without route damping enabled, in a setup
+of BGP updates sent with and without route damping enabled, in a simplified setup
 where only one of the bgp router was receiving advertisments for flapping
-routes. 
+routes.
 \end{abstract}
 
 \section{Introduction}
@@ -43,9 +43,9 @@ routes.
 The inter-domain routing protocol BGP is still surviving to the gigantic
 growth of the Internet that started during the last decade. However,
 some widely used applications, such as Skype, still suffer from weaknesses
-of that protocol. The main problems are twofolds: Firstly, BGP has
-a slow convergence rate, meaning that a change at one location takes
-quite some time to be propagated to the other ends of the network.
+in that protocol. The main problems are twofolds: firstly, BGP has
+a slow convergence rate, meaning that a change at one location can take
+long before it is propagated to the other ends of the network.
 Secondly, if a node becomes unstable, for example if its connectivity
 constantly comes up and down, it will have bad consequences on the
 network, both in terms of useless processing at BGP routers and unnecessary
@@ -55,7 +55,7 @@ of time are said to be \textit{flapping}.
 Many approaches to counter route flapping have been developped in
 the late 90's. RFC 2439\cite{rfc2439} standardized one such approach
 : it basically blocks updates from flapping routes, and does so until
-the routes are deemed stable again. This RFC has been used it extensively
+the routes are deemed stable again. This RFC has been used extensively
 for many years, in both commercial and open source routers.
 
 Although this standard is not recommended anymore\cite{ripe recommendations}
@@ -135,45 +135,46 @@ switch.
 
 \subsection{Data structures}
 
-Data structure details and alternatives are explained in the RFC 2439,
-§4.4 (Run Time Data Structures). The main data structure of the implementation
-are damping\_config and damping\_info. They can be found in the file
-/bird/proto/bgp/damping.h.
+The data structures used by the implementation are very close to those described 
+in the RFC (\S4.4, \textit{Run Time Data Structures}).
+The most important of which are certainly {\tt\small damping\_config} and
+{\tt\small damping\_info}.
+Their definitions can be bound in {\sl damping.h}.
 
-The damping\_config structure contains all the BGP configuration parameters
-values for one EBGP peer. For instance, this structure carries the
-values for the suppressed limit threshold or the reused limit one.
-The damping\_info is the structure associated to one route. Therefore,
-the figure of merit of the route can be found there as well as the
-last time when the penalty of the route has been updated.
+{\tt\small damping\_config} groups all configurations parameters for a BGP peer.
+This allows network administrators to have different sets of parameters for
+differents routes. {\it I.e} \texttt{\small damping\_config}s have a one-to-one relation
+to BIRD's \texttt{\small bgp\_proto}.
+This structure contains all the parameters controlling the behaviour of the damping algorithm :
+\texttt{\small reuse\_threshold}, \texttt{\small cut\_threshold}, 
+\texttt{\small ceiling}, \texttt{\small tmax\_hold} and \texttt{\small half\_time}.
+Additionally, it contains some informations used to speedup the algorithm (at the cost of a more
+important memory consumption) : both the decay arrays and the reuse lists are contained here.
+The former speeds up the computation of new figure of merits by pre-computing a predefined set
+of (costy) exponentials and using them when figures of merit needs to be updated.
+The latter limitates the time of computation at every timer tick by grouping damped routes
+according to their penalty term.
+The penalty terms of a group of routes are updated every $n$ ticks, where $n$ is the number of
+reuse lists, instead of being updated at every tick.
+Reuse lists are implemented using \texttt{\small slist}s, a doubly linked list implementation provided by BIRD.
 
-An other important structure is the hash table which memorize all
-the route of BGP, which name is damping\_info\_fib. This structure
-contains all damping\_info structure which has just been describe
-here on this subsection. Thus when all the routes must be display
-or only a subset of them, this structure damping\_info\_fib must be
-retrieved as for instance in the function show\_dampened\_paths in
-the file /bird/proto/bgp/damping.c:
+BIRD's timer are used to regularly update the penalty terms of routes : every \texttt{\small bgp\_proto} structure
+contains a \texttt{\small reuse\_list\_timer}.
+These timers are set up to call \texttt{\small damping\_reuse\_timer\_handler} at every tick.
 
-A last extremely used structure is the reuse list (reuse\_lists) which
-is carried by the damping\_config structure described here above.
-The reuse list stores the dampened routes, which are suppressed routes.
-It has been implemented in a extremely smart way to mimic the exponential
-decay of penalty as shown in section 2 (Overview). Instead of computing
-each new penalty value at each new step of the timer, the penalty
-of route is reviewed only when it could be potentially under the reuse
-threshold and thus, potentially considered as a no-flapping route.
-It means that the reuse list system mimics the exponential decay and
-tries to find the correct index of the list for each routes. For instance,
-a route with a high penalty value will have a more long exponential
-decay time before potentially reaching the reuse threshold. Such a
-route received a high index (or far from the threshold). It is why
-the index could also be seen as a distance metric based on a exponential
-curve.
+The core of the damping algorithm lies with the \texttt{\small damping\_info} structure.
+The penalty term is stored in that structure, along with a timestamp indicating when the last
+update of the penalty term was.
+Other informations, such as the IP prefix of the route, reuse list pointers and route attributes (BIRD specific) are also included
+in \texttt{\small damping\_info}.
+One such structure is allocated once a route starts to flap, and is de-allocated whenever the penalty term becomes ``small enough''.
+There is a one-to-one mapping between routes (\texttt{\small rte} in BIRD) and \texttt{\small damping\_info}.
+This mapping was made possible by FIBs, an hash table implementation provided by BIRD's API.
+FIBs basically map IP prefixes to any other data structure, {\tt\small damping\_info}s in our case.
+This is an important implementation detail : this hash table establishes a link between routes (\textit{i.e.} IP prefix + {\tt\small bgp\_proto})
+and {\tt\small damping\_info}.
 
-FIBs are provided by BIRD API and implement an hash table that maps IP prefixes to any other data structure, {\tt\small damping\_info}s in our case.
-This is an important implementation detail : this hash table indeed establishes a link between routes (\textit{i.e.} IP prefix + {\tt\small bgp\_proto})
-and {\tt\small damping\_info}. 
+Last but not least, the fact that BIRD uses only one thread made our job much simpler as we didn't have to worry about concurrency.
 
 \subsection{Configuration parameters}
 
