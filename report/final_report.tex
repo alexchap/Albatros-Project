@@ -335,17 +335,16 @@ It is thus logic that the difference between the first and third settings have t
 
 \section{Conclusion}
 
-We have shown that a ``simple'' method like that presented in RFC 2439 can significantly improve the overall health of a whole network.
-
+We have shown that a ``simple'' method (around 1000 lines of C code) like that presented in RFC 2439 can significantly improve the overall health of a whole network.
+It not only reduces the traffic, but can also help BGP converge by preventing unwanted traffic from spreading to the whole network (we didn't study this part).
 
 \subsection{Future work}
 
 Several extensions proposed in the RFC still need to be implemented.
-In particular, the RFC suggests that a network administrator may want penalty terms to behave differently depending on whether their route is dampened or not.
-Initially, we also wanted to 
+For instance, the RFC suggests that a network administrator may want penalty terms to behave differently depending on whether their route is dampened or not.
+Initially, we also wanted to improve the algorithm of the RFC, but understanding BIRD's code and debugging our own took us more time than expected, and we eventually ran out of time and could barely finish the testing phase.
 
 Finally, it would have been really interesting to test route damping on a real scale system, and for a longer time span than 15 minutes.
-Unfortunately 
 
 \begin{thebibliography}{6}
 
