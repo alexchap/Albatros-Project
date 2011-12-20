@@ -255,41 +255,35 @@ The rationale being that when the penalty term gets much smaller than the {\tt\s
 
 \section{Evaluation}
 
-\begin{figure}
-\caption{Topology used for our simulation}
-
-\end{figure}
-
 \subsection{Overview}
 
-We used a topology of 27 routers in the NSL cluster in order to evaluate
-our implementation. This topology consits of 10 Autonomous systems.
-Router number 3 with network prefix 10.0.0.3/24 was the the one that
-fed the whole network 10.0.0.0/24 with updates coming from one MRT
-dump archive (updates.20100401.1729), that we got from the Route Views
-project\cite{routeviews}. This archive corresponds to 15 minutes
-of real BGP traffic that were sent by 11 BGP routers. The topology
-used is represented in figure x.
+We used a topology of 27 routers in the NSL cluster to evaluate
+our implementation.
+This topology is composed of 10 Autonomous Systems :
 
-We ran 3 simulations and recorded every 10 seconds the total number
-of updates and withrawals received from all neighbors for all routers.
-When route damping was enabled, we also recorded the number of route
-dampened at any given time. 
+\begin{center}
+\includegraphics[scale=.3]{img/topology.png}
+\end{center}
+
+The experiment replays updates contained into an archive,
+\textsl{updates.20100401.1729} (the archive comes from \cite{routeviews}).
+This archive is composed of advertisements sent by 11 BGP routers and collected
+over a period of time of 15 minutes.
+All updates are sent to router 3 (\texttt{\small 10.0.0.3}), which then relays them
+in the network.
+We ran 3 simulations, with different settings :
+
 \begin{enumerate}
-\item The first simulation was made without route damping and with the official
-bird daemon.... 
-\item The seconds was made with our bird implementation and default damping
-parameters.... 
-\item The third was the same as the second, except for the cut\_threshold
-parameters that was set to 1000 instead of 1500.... 
+\item The first simulation was run with the original BIRD code, without route damping.
+\item The second one had route damping enabled and used the default parameters.
+\item The third one used a more aggressive settings : \texttt{\small cut\_threshold} was lowered to 1000 (vs 1500 for the default setting).
 \end{enumerate}
 
+During the experiment, the number of updates and withdrawals were collected every 10 seconds (\textit{i.e.} we collected the total number of update/withdrawals received at every router).
+The number of dampened routes was also collected, for the settings where route damping was enabled.
+The number of updates/withdrawals cumulate over time, whereas the number of dampened routes is immediate.
+
 \subsection{Evolution of dampened paths}
-
-\begin{figure}
-\caption{Evolution of dampened paths for Simulation 3}
-
-\end{figure}
 
 it represent time vs. the actual number of dampened routes in AS2
 (actually, router 3)
@@ -298,12 +292,6 @@ also note that we aggregated results for each AS (for better readability)
 
 
 \subsection{Number of route updates}
-
-\begin{figure}
-\caption{Difference of import updates between simulations 1 and 3}
-
-\end{figure}
-
 
 it's the difference between graph sim1 and graph sim3 -> i.e we have
 less updates in SIM3 ! :-)
