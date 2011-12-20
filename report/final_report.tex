@@ -129,7 +129,7 @@ The configuration file parser had to be modified in order to correctly handle th
 required by the RFC.
 Also, we had to make similar modifications to the command line parser so that suppressed routes
 could be listed using the \texttt{\small show dampened paths} command.
-The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating the total number of currently damped routes.
+The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating whether a route is damped or not.
 Last but not least, we had to add hooks to BIRD's BGP implementation : whenever a route is added or withdrawn, our code is executed.
 Route damping is enabled at configure time by adding the {\tt\small -{}-enable-route-damping}
 switch.
@@ -281,44 +281,54 @@ We ran 3 simulations, with different settings :
 
 During the experiment, the number of updates and withdrawals were collected every 10 seconds (\textit{i.e.} we collected the total number of update/withdrawals received at every router).
 The number of dampened routes was also collected, for the settings where route damping was enabled.
-The number of updates/withdrawals cumulate over time, whereas the number of dampened routes is immediate.
+The number of updates/withdrawals cumulates over time, whereas the number of dampened routes is immediate.
 
 \subsection{Evolution of dampened paths}
 
-it represent time vs. the actual number of dampened routes in AS2
-(actually, router 3)
+The following figure shows the accumulated number of dampened routes for router 3.
+Snapshots were taken every 10 seconds.
+The results are shown for the third setting.
+Unsurprisingly, the results for the second setting (with more passive damping) were not as good :
+most of the route flappings went undetected (this figure is not shown here).
 
-also note that we aggregated results for each AS (for better readability)
-
+\begin{center}
+\includegraphics[scale=.45]{img/SIM3_evolution_of_dampened_paths.pdf}
+\end{center}
 
 \subsection{Number of route updates}
 
-it's the difference between graph sim1 and graph sim3 -> i.e we have
-less updates in SIM3 ! :-)
+While it is interesting to know the number of dampened paths, it is much more relevant to know
+how many updates were blocked, as limiting irrelevant traffic is precisely the aim of the RFC.
+The following figure shows the difference of the number of updates received in the first
+and third settings, per AS.
 
-maybe we can also display one graph with the evolution -> show that
-the number is quite huge !! and that's why we show the difference
-rather than the two graph on top of each other !
+\begin{center}
+\includegraphics[scale=.5]{img/diff_sim1_sim3.pdf}
+\end{center}
 
+As shown in the figure, the number of blocked updates is around $10^4$ for a period of about 15 minutes.
+We didn't expect so many messages to be blocked.
+Also, we can notice that the number of updates varies a lot between different ASes.
+This can certainly be exploited to enable route damping on only the most vulnerable nodes (typically ASes 5, 8 and 2 in this case).
 
 \subsection{Number of withdrawals}
 
-works for sim3, not for sim2 !
+Similarly, we measured the number of withdrawals per AS :
 
+\begin{center}
+\includegraphics[scale=.5]{}
+\end{center}
 
 \section{Conclusion}
 
 show importance of stability
 
 
-\section{Future work}
+\subsection{Future work}
 
 possible extensions
 
 real scale tests
-
-
-\section{Acknowledgement}
 
 \begin{thebibliography}{6}
 
