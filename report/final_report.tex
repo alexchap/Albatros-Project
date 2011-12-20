@@ -129,7 +129,7 @@ The configuration file parser had to be modified in order to correctly handle th
 required by the RFC.
 Also, we had to make similar modifications to the command line parser so that suppressed routes
 could be listed using the \texttt{\small show dampened paths} command.
-The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating whether a route is damped or not.
+The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating the total number of currently damped routes.
 Last but not least, we had to add hooks to BIRD's BGP implementation : whenever a route is added or withdrawn, our code is executed.
 Route damping is enabled at configure time by adding the {\tt\small -{}-enable-route-damping}
 switch.
@@ -314,13 +314,20 @@ This can certainly be exploited to enable route damping on only the most vulnera
 \subsection{Number of withdrawals}
 
 Similarly, we measured the number of withdrawals per AS.
-Here is the figure for the first setting :
 
 \begin{center}
 \includegraphics[scale=.5]{img/SIM1_withdrawals.pdf}
 \end{center}
 
-And the one for the second setting :
+The previous figure shows the number of withdrawals for the first setting.
+The next one shows the number of withdrawals for the third setting.
+Once again, the second setting was much too laxist and yielded results similar to that of the first setting.
+
+The differences are really small even between the first and third settings though.
+The biggest differences are in the order of the hundred, which contrasts a lot from the previous results.
+This can be explained by the ratio between updates and withdrawals.
+There are about $10^5$ updates received, much more than the $10^3$ withdrawals received.
+It is thus logic that the difference between the first and third settings have the same ratio.
 
 \begin{center}
 \includegraphics[scale=.5]{img/SIM3_withdrawals.pdf}
@@ -328,14 +335,17 @@ And the one for the second setting :
 
 \section{Conclusion}
 
-show importance of stability
+We have shown that a ``simple'' method like that presented in RFC 2439 can significantly improve the overall health of a whole network.
 
 
 \subsection{Future work}
 
-possible extensions
+Several extensions proposed in the RFC still need to be implemented.
+In particular, the RFC suggests that a network administrator may want penalty terms to behave differently depending on whether their route is dampened or not.
+Initially, we also wanted to 
 
-real scale tests
+Finally, it would have been really interesting to test route damping on a real scale system, and for a longer time span than 15 minutes.
+Unfortunately 
 
 \begin{thebibliography}{6}
 
