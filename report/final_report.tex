@@ -129,7 +129,7 @@ The configuration file parser had to be modified in order to correctly handle th
 required by the RFC.
 Also, we had to make similar modifications to the command line parser so that suppressed routes
 could be listed using the \texttt{\small show dampened paths} command.
-The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating whether a route is damped or not.
+The \texttt{\small show protocols all} was also extended with a ``damped'' field, indicating the total number of currently damped routes.
 Last but not least, we had to add hooks to BIRD's BGP implementation : whenever a route is added or withdrawn, our code is executed.
 Route damping is enabled at configure time by adding the {\tt\small -{}-enable-route-damping}
 switch.
