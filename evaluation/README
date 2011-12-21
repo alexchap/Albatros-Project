@@ -1,3 +1,7 @@
+--- FIRST STEP ---
+
+Untar the desired archive from the data directory
+
 Call the script process_stats.pl in order to generate the evolution of 
 statistics that are saved in the stats directory
 The results are saved in the processed directory
@@ -6,3 +10,12 @@ Files are generated and the rows of a file for a router represents :
 1) evolution of Import updates received
 2) evolution of Import withdraws received
 2) evolution of import updates damped
+
+--- SECOND STEP ---
+
+Rename the processed directory to SIMX for simulation X
+do the first step for other simulation if needed
+
+--- THIRD STEP ---
+
+Use the matlab scripts in order to generate graphs and comparisons

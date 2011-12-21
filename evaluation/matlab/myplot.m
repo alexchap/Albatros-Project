@@ -64,7 +64,7 @@ end
 legend(legends,'Location','NorthWest');
 hold off
 
-img_name = sprintf('../img/%s.eps',mytitle);
-saveas(gcf,img_name,'eps');
+img_name = sprintf('../img/%s.png',mytitle);
+saveas(gcf,img_name,'png');
 disp(sprintf('Image saved to %s',img_name));
 end

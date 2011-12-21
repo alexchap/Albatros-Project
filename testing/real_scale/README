@@ -1,3 +1,8 @@
+PREREQUISITE
+
+- have the bird compiled without route damping in the folder bird/compiled
+- have the modified bird compiled in the folder ourbird/compiled
+
 Directory structure 
 
 - bird : official bird, not modified

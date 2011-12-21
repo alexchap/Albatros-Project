@@ -1,19 +1,10 @@
 TODO project albatros
 
-Status : 15th December 2011
+Status : 21st December 2011
 
-Priorities
-
-- make sure stats in show protocols all match output of sh dampened paths
-
-- damping.c : Fix ambiguity with variable names proto vs. p
 - FIX compilation problem when no damping -> can we define a conditional grammar in config.Y ?
   i.e if route damping is disabled, no need to create damping_config !
   same question for including dampin.c in the makefile -> conditional ?
 
-Not too urgent
-
 - Paramters without underscore !?
-- Documentation
-- Test it on real scale
 - Ipv6 version !? -> in packets.c 

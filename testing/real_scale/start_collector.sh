@@ -53,4 +53,3 @@ while true;do
 
 done
 
-# TODO (not related to here but reminder : check # damped = # shown !
