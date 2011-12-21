@@ -3,22 +3,22 @@
 
 for k=1:3
     
-mytitle1 = sprintf('SIM%d evolution of import updates received',k);
-mytitle2 = sprintf('SIM%d evolution of import withdraws received',k);
-mytitle3 = sprintf('SIM%d evolution of dampened paths',k);
+mytitle1 = sprintf('EXP%d evolution of import updates received',k);
+mytitle2 = sprintf('EXP%d evolution of import withdraws received',k);
+mytitle3 = sprintf('EXP%d evolution of dampened paths',k);
 
-data = get_data(sprintf('../SIM%d',k));
+data = get_data(sprintf('../EXP%d',k));
 
 % aggregate for all AS's (see eval-topo.ppt)
 data_as = aggregate_as(data);
 
 % First graph : evolution of import updates received, for each 
 % router. The sum over the whole network is also displayed
-myplot(data_as,1,'Number of import updates received','AS ',mytitle1,0);
+myplot(data_as,1,'Number of import updates received','AS ',mytitle1,1);
 
 % Second graph : evolution of import withdraws received, for each 
 % router. The sum over the whole network is also displayed
-myplot(data_as,2,'Number of import withdraws received','AS ',mytitle2, 0);
+myplot(data_as,2,'Number of import withdraws received','AS ',mytitle2, 1);
 
 % First graph : evolution of dampened routes, for each 
 % router. The sum over the whole network is also displayed

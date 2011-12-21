@@ -13,9 +13,10 @@ Files are generated and the rows of a file for a router represents :
 
 --- SECOND STEP ---
 
-Rename the processed directory to SIMX for simulation X
-do the first step for other simulation if needed
+Rename the processed directory to EXPN for simulation N
 
 --- THIRD STEP ---
 
 Use the matlab scripts in order to generate graphs and comparisons
+If you want to compare experiments, do the first and second step for
+each experiment results you need

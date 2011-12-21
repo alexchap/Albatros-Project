@@ -47,14 +47,6 @@
 #include "bgp.h"
 #include "damping.h"
 
-// name conflict with math's log function
-// use log_tmp instead of log
-// XXX: is it still the case ?
-#ifdef log
-#define log_tmp log
-#undef log
-#endif
-
 /**
  * A new damping configuration is allocated for the BGP instance
  */

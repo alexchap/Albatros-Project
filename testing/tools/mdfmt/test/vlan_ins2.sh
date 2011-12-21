@@ -1,0 +1,11 @@
+/sbin/vconfig add eth0 40 && /sbin/ifconfig eth0.40 206.223.115.19 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 41 && /sbin/ifconfig eth0.41 206.223.115.12 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 42 && /sbin/ifconfig eth0.42 206.223.115.120 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 43 && /sbin/ifconfig eth0.43 206.223.115.10 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 44 && /sbin/ifconfig eth0.44 206.223.115.26 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 45 && /sbin/ifconfig eth0.45 206.223.115.81 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 46 && /sbin/ifconfig eth0.46 206.223.115.24 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 47 && /sbin/ifconfig eth0.47 206.223.115.25 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 48 && /sbin/ifconfig eth0.48 206.223.115.61 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 49 && /sbin/ifconfig eth0.49 206.223.115.60 netmask 255.255.255.128 up
+/sbin/vconfig add eth0 50 && /sbin/ifconfig eth0.50 206.223.115.47 netmask 255.255.255.128 up

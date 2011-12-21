@@ -1,0 +1,4 @@
+- IPv6 support in BGP4MP header (mrt.py)
+- IPv6 support in route_btoa.py
+- parsing statistics
+- robust exception handling

@@ -1,0 +1,11 @@
+/sbin/ifconfig eth0.40 down && /sbin/vconfig rem eth0.40
+/sbin/ifconfig eth0.41 down && /sbin/vconfig rem eth0.41
+/sbin/ifconfig eth0.42 down && /sbin/vconfig rem eth0.42
+/sbin/ifconfig eth0.43 down && /sbin/vconfig rem eth0.43
+/sbin/ifconfig eth0.44 down && /sbin/vconfig rem eth0.44
+/sbin/ifconfig eth0.45 down && /sbin/vconfig rem eth0.45
+/sbin/ifconfig eth0.46 down && /sbin/vconfig rem eth0.46
+/sbin/ifconfig eth0.47 down && /sbin/vconfig rem eth0.47
+/sbin/ifconfig eth0.48 down && /sbin/vconfig rem eth0.48
+/sbin/ifconfig eth0.49 down && /sbin/vconfig rem eth0.49
+/sbin/ifconfig eth0.50 down && /sbin/vconfig rem eth0.50

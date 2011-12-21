@@ -1,0 +1,34 @@
+-------------------------------------------------------------------------------
+pybgpdump 0.2
+-------------------------------------------------------------------------------
+  Jon Oberheide <jon@oberheide.org>
+  http://jon.oberheide.org/projects/pybgpdump
+
+DESCRIPTION
+
+  pybgpdump combines the functionality of libbgpdump and the ease of python to
+  parse BGP messages from MRT dumps.
+
+FEATURES
+
+  * currently support for IPv4 BGP4MP_MESSAGE and BGP4MP_MESSAGE_32BIT_AS
+  * supports uncompressed, gzip'ed, and bzip2'ed files transparently
+  * includes sample programs, such as route_btoa.py
+
+INSTALL
+
+  make
+  make install
+
+DOCUMENTATION
+
+  See the samples directory.
+
+DEPENDENCIES
+
+  pybgpdump depends on the MRT and BGP modules of dpkt (SVN/1.7) which can be
+  found here: http://www.monkey.org/~dugsong/dpkt/
+
+LICENSE
+
+  pybgpdump is distributed under the GPL Version 2.  See COPYING for details.
