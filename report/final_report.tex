@@ -32,10 +32,9 @@ networks. In this report, we explain our implementation of the RFC
 2439, BGP Route Flap Damping, for one famous Open Source routing software
 suite, the Bird Routing Project.
 
-We also present results of an experiment where we compared the number
+We also present results of 3 experiments where we compared the number
 of BGP updates sent with and without route damping enabled, in a simplified setup
-where only one of the bgp router was receiving advertisments for flapping
-routes.
+where only one of the bgp routers was receiving updates from the external world.
 \end{abstract}
 
 \section{Introduction}
@@ -62,7 +61,7 @@ Although this standard is not recommended anymore\cite{ripe recommendations}
 in today's routers, we wanted to implement it for the Bird Routing
 Project\cite{bird}, hoping that it will serve as a good basis for
 future possible improvements and extensions to this RFC. There exist
-many variants of the Route Flap Damping alorithm and the community
+many variants of the Route Flap Damping algorithm and the community
 has not lost its interest in finding robust mechanisms that could
 allow BGP to be more resilient.
 
@@ -70,7 +69,7 @@ allow BGP to be more resilient.
 \section{Overview}
 
 RFC 2349 seeks to limit the impact of route flapping by ``damping''
-(\textit{i.e.} ignoring packets of) missbehaving routes. The solution
+(\textit{i.e.} ignoring packets of) misbehaving routes. The solution
 must be able to distinguish flapping routes from good routes and consume
 few resources, both in terms of memory usage and process time. The
 RFC solves these problems by assigning each route a penalty term.
@@ -90,8 +89,8 @@ time, while newer ones have more weight.
 
 Network administrators have lots of freedom in choosing the behavior
 of the penalty term : they can control the half-life of the penalty
-term, its maximum value (thus controlling the maximum time a route
-can be suppressed) and both the reuse and cut thresholds.
+term, the maximum time interval a route can be suppressed (thus 
+controlling the maximum penalty) and both the reuse and cut thresholds.
 
 Here is an example showing how the figure of merit evolves over time
 (the illustration comes from \cite{damping-pic}). The route flaps
@@ -240,7 +239,6 @@ Those hooks ensure that the {\tt\small damping\_add\_route} or {\tt\small dampin
 called when routes are advertised or withdrawn, respectively.
 
 As those functions are similar to their equivalent in the RFC, only the relevant implementation details are covered here.
-Please refer to the RFC for additional details.
 
 When a route is removed for the first time, a new {\tt\small damping\_info} is allocated in a {\tt\small damping\_info\_fib}, and its penalty term is set to a default value.
 The penalty term of this route is updated as the route is re-advertised and removed again.
@@ -259,11 +257,14 @@ The rationale being that when the penalty term gets much smaller than the {\tt\s
 
 We used a topology of 27 routers in the NSL cluster to evaluate
 our implementation.
-This topology is composed of 10 Autonomous Systems :
-
+This topology is composed of 10 Autonomous Systems and is displayed in figure \ref{fig_topo}
+\begin{figure}
 \begin{center}
 \includegraphics[scale=.3]{img/topology.png}
 \end{center}
+\caption{The topology used in our real scale experiments. \textit{Image courtesy of Marco Canini}}
+\label{fig_topo}
+\end{figure}
 
 The experiment replays updates contained into an archive,
 \textsl{updates.20100401.1729} (the archive comes from \cite{routeviews}).
@@ -271,67 +272,80 @@ This archive is composed of advertisements sent by 11 BGP routers and collected
 over a period of time of 15 minutes.
 All updates are sent to router 3 (\texttt{\small 10.0.0.3}), which then relays them
 in the network.
-We ran 3 simulations, with different settings :
+We carried out 3 experiments, with different settings :
 
 \begin{enumerate}
-\item The first simulation was run with the original BIRD code, without route damping.
+\item The first experiment was run with the original BIRD code, without route damping.
 \item The second one had route damping enabled and used the default parameters.
-\item The third one used a more aggressive settings : \texttt{\small cut\_threshold} was lowered to 1000 (vs 1500 for the default setting).
+\item The third one used a more aggressive \texttt{\small cut\_threshold} : it was lowered to 1000 (vs 1500 for the default setting).
 \end{enumerate}
 
-During the experiment, the number of updates and withdrawals were collected every 10 seconds (\textit{i.e.} we collected the total number of update/withdrawals received at every router).
+During these experiments, the number of updates and withdrawals were collected every 10 seconds (\textit{i.e.} we collected the total 
+number of update/withdrawals received at every router).
 The number of dampened routes was also collected, for the settings where route damping was enabled.
 The number of updates/withdrawals cumulates over time, whereas the number of dampened routes is immediate.
+We compare in the following subsections the number of dampened paths for experiments 2 and 3, and the evolution of 
+withdraws and import updates between experiment 1 and 3.
 
 \subsection{Evolution of dampened paths}
 
-The following figure shows the accumulated number of dampened routes for router 3.
-Snapshots were taken every 10 seconds.
-The results are shown for the third setting.
-Unsurprisingly, the results for the second setting (with more passive damping) were not as good :
-most of the route flappings went undetected (this figure is not shown here).
+The evolution of dampened paths is shown on Figure \ref{fig_dampenedpaths}. The trend is similar for experiments 2 and 3. This is an expected results,
+as we use the same updates as input to our network. We note however that after 15 minutes, there are some more routes that are damped 
+with more aggressive parameters. (experiment 3)
+As you might understand, the number of damped routes grows with time. If we had waited more time without sending
+new updates, we would have expected this curve to sink and finally reach 0, as the penalty of each route would
+have decayed below the reuse\_threshold.
 
+\begin{figure}
 \begin{center}
-\includegraphics[scale=.45]{img/SIM3_evolution_of_dampened_paths.pdf}
+\includegraphics[scale=.5]{img/dampened_paths.pdf}
 \end{center}
+\caption{Evolution of the number of dampened paths for experiments 2 and 3. The replayed updates contained some misbehaving routes.}
+\label{fig_dampenedpaths}
+\end{figure}
 
 \subsection{Number of route updates}
 
-While it is interesting to know the number of dampened paths, it is much more relevant to know
+While it is interesting to see the evolution of the number of dampened paths, it is much more relevant to know
 how many updates were blocked, as limiting irrelevant traffic is precisely the aim of the RFC.
-The following figure shows the difference of the number of updates received in the first
-and third settings, per AS.
+Figure \ref{fig_exp1_updates} shows the number of updates in experiment 1, aggregated per AS. Note that the number is quite huge,
+for only 15 minutes of updates. The total number of updates exchanged at the end reaches a number close to 350 000. 
+That's exactly one issue of our chatty BGP, that we'd like to fix with the damping capability.
+Figure \ref{fig_diff_updates} represents the number of updates we could block with damping. It's the number of updates
+in experiment 1 minus the number of updates in experiment 3. The total is quite representative of the effects of BGP
+route flap damping: about 9000 updates could be avoided !
 
+\begin{figure}
 \begin{center}
-\includegraphics[scale=.5]{img/diff_sim1_sim3.pdf}
+\includegraphics[scale=.5]{img/exp1_updates.pdf}
 \end{center}
+\caption{Evolution of import updates when damping is not activated.}
+\label{fig_exp1_updates}
+\end{figure}
 
-As shown in the figure, the number of blocked updates is around $10^4$ for a period of about 15 minutes.
-We didn't expect so many messages to be blocked.
-Also, we can notice that the number of updates varies a lot between different ASes.
-This can certainly be exploited to enable route damping on only the most vulnerable nodes (typically ASes 5, 8 and 2 in this case).
+\begin{figure}
+\begin{center}
+\includegraphics[scale=.5]{img/diff_exp1_exp3_updates.pdf}
+\end{center}
+\caption{Number of updates that could be blocked with damping in experiment 3.}
+\label{fig_diff_updates}
+\end{figure}
 
 \subsection{Number of withdrawals}
 
-Similarly, we measured the number of withdrawals per AS.
+Similarly, we measured the number of withdrawals per AS for all experiments. 
+The number of withdraws that were blocked is displayed in Figure \ref{fig_diff_withdraws}
+TODO: more comments... will come soon !
 
+\begin{figure}
 \begin{center}
-\includegraphics[scale=.5]{img/SIM1_withdrawals.pdf}
+\includegraphics[scale=.5]{img/diff_exp1_exp3_withdraws.pdf}
 \end{center}
+\caption{Number of withdraws that could be blocked with damping in experiment 3}
+\label{fig_diff_withdraws}
+\end{figure}
 
-The previous figure shows the number of withdrawals for the first setting.
-The next one shows the number of withdrawals for the third setting.
-Once again, the second setting was much too laxist and yielded results similar to that of the first setting.
 
-The differences are really small even between the first and third settings though.
-The biggest differences are in the order of the hundred, which contrasts a lot from the previous results.
-This can be explained by the ratio between updates and withdrawals.
-There are about $10^5$ updates received, much more than the $10^3$ withdrawals received.
-It is thus logic that the difference between the first and third settings have the same ratio.
-
-\begin{center}
-\includegraphics[scale=.5]{img/SIM3_withdrawals.pdf}
-\end{center}
 
 \section{Conclusion}
 

@@ -42,7 +42,7 @@ fi
 sudo vde_switch -daemon -tap tap11 -tap tap12
 
 # Start bird
-#sudo bird -c rta.conf -s /usr/local/var/run/bird_rta.ctl -D /var/log/bird-top04-rta.debug &
+sudo bird -c rta.conf -s /usr/local/var/run/bird_rta.ctl -D /var/log/bird-top04-rta.debug &
 
 cat  useful_commands.txt
 

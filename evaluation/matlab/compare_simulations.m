@@ -24,8 +24,8 @@ for k=1:length(data1_as)
 
 end
 
-mytitle1='Difference of import updates received between EXP2 and EXP3';
-mytitle2='Difference of import withdraws received between EXP2 and EXP3';
+mytitle1='Difference of import updates received between EXP1 and EXP2';
+mytitle2='Difference of import withdraws received between EXP1 and EXP2';
 
 
 myplot(diff,1,'Import updates received (EXP1 - EXP2)','AS ',mytitle1, 1);

@@ -5,6 +5,7 @@ please configure it with the option --enable-route-damping.
 
 Example : 
 cd bird
+autoconf
 ./configure --enable-route damping [other options if needed]
 make
 sudo make install
