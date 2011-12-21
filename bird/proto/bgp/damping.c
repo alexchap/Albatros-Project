@@ -65,6 +65,11 @@ struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold
   return dcf;
 }
 
+// name conflict between bird's log macro and math.h's log function
+#ifdef log
+#undef log
+#endif
+
 /**
  * Once the parameters are known from the configuration file, we can process them
  * to create the runtime configuration. We need to allocate the reuse lists, to
