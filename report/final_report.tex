@@ -32,9 +32,16 @@ networks. In this report, we explain our implementation of the RFC
 2439, BGP Route Flap Damping, for one famous Open Source routing software
 suite, the Bird Routing Project.
 
+<<<<<<< HEAD
 We also present results of 3 experiments where we compared the number
 of BGP updates sent with and without route damping enabled, in a simplified setup
 where only one of the bgp routers was receiving updates from the external world.
+=======
+We also present results of an experiment where we compare the number
+of BGP updates sent with and without route damping enabled, in a simplified setup
+where only one of the bgp router received advertisments for flapping
+routes.
+>>>>>>> 59bafebbd3f8c57fb0e53ef11a22d5fa97e0ee44
 \end{abstract}
 
 \section{Introduction}
@@ -51,15 +58,15 @@ network, both in terms of useless processing at BGP routers and unnecessary
 routing traffic. Routes advertised and withdrawn at regular interval
 of time are said to be \textit{flapping}.
 
-Many approaches to counter route flapping have been developped in
+Many approaches to counter route flapping were developped in
 the late 90's. RFC 2439\cite{rfc2439} standardized one such approach
 : it basically blocks updates from flapping routes, and does so until
 the routes are deemed stable again. This RFC has been used extensively
 for many years, in both commercial and open source routers.
 
 Although this standard is not recommended anymore\cite{ripe recommendations}
-in today's routers, we wanted to implement it for the Bird Routing
-Project\cite{bird}, hoping that it will serve as a good basis for
+for today's routers, we wanted to implement it for the Bird Routing
+Project\cite{bird}, hoping that it would serve as a good basis for
 future possible improvements and extensions to this RFC. There exist
 many variants of the Route Flap Damping algorithm and the community
 has not lost its interest in finding robust mechanisms that could

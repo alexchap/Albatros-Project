@@ -38,7 +38,6 @@
 #define LOCAL_DEBUG 1
 
 #include <math.h>
-#include <assert.h>
 
 #include "nest/bird.h"
 #include "lib/timer.h"
@@ -71,6 +70,11 @@ struct damping_config *damping_config_new(int reuse_threshold, int cut_threshold
       cut_threshold, reuse_threshold, tmax_hold, half_time);
   return dcf;
 }
+
+// name conflict between bird's log macro and math.h's log function
+#ifdef log
+#undef log
+#endif
 
 /**
  * Once the parameters are known from the configuration file, we can process them
@@ -132,11 +136,9 @@ void damping_config_check(struct damping_config * dcf)
   return;
 }
 
-static void damp_free_damping_info(damping_info *info)
+static inline void damp_free_damping_info(damping_info *info)
 {
   rta_free(info->attrs);
-  assert(info->current_reuse_list == NULL);
-  return;
 }
 
 static inline int is_suppressed(damping_info *info)
