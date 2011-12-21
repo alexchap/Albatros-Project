@@ -79,7 +79,7 @@ void show_dampened_paths(struct proto *p);
 #define DEFAULT_TMAX_HOLD		3000
 
 /* Other parameters */
-#define N_REUSE_LISTS			10	/* Number of reuse lists */
+#define N_REUSE_LISTS			32	/* Number of reuse lists */
 #define DELTA_T_REUSE			15	/* Reuse time granularity */
 #define DELTA_T				1	/* Time granularity */
 #define DEFAULT_FIGURE_OF_MERIT		1000	/* Default penalty */
