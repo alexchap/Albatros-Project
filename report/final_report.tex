@@ -43,7 +43,7 @@ The inter-domain routing protocol BGP is still surviving to the gigantic
 growth of the Internet that started during the last decade. However,
 some widely used applications, such as Skype, still suffer from weaknesses
 in that protocol. The main problems are twofolds: firstly, BGP has
-a slow convergence rate, meaning that a change at one location can take
+a slow convergence time, meaning that a change at one location can take
 long before it is propagated to the other ends of the network.
 Secondly, if a node becomes unstable, for example if its connectivity
 constantly comes up and down, it will have bad consequences on the
@@ -92,15 +92,19 @@ of the penalty term : they can control the half-life of the penalty
 term, the maximum time interval a route can be suppressed (thus 
 controlling the maximum penalty) and both the reuse and cut thresholds.
 
-Here is an example showing how the figure of merit evolves over time
-(the illustration comes from \cite{damping-pic}). The route flaps
-three times, exceeding the cut threshold only after the third flap.
-The route is reused as soon as its penalty term goes below the reuse
-limit.
+Figure \ref{fig_penalty} is an example of how the figure of merit 
+evolves over time (the illustration comes from \cite{damping-pic}).
+The route flaps three times, exceeding the cut threshold only after 
+the third flap. The route is reused as soon as its penalty term goes 
+below the reuse limit.
 
+\begin{figure}
 \begin{center}
 \includegraphics[scale=0.5]{route_damping} 
 \par\end{center}
+\caption{Typical evolution of the penalty assigned to a route.}
+\label{fig_penalty}
+\end{figure}
 
 Penalty terms are re-computed at regular time intervals using timers.
 Also, every time an update for a route is received, the penalty term
@@ -108,7 +112,7 @@ for that route is re-computed.
 
 The RFC proposes several optimizations to decrease processing time,
 at the cost of a slightly bigger memory footprint. \textit{E.g. reuse
-lists} are used to not have to recompute the figure of merit of all
+lists} are used to avoid recomputing the figure of merit for all
 routes : damped routes with similar penalty terms are grouped together
 in a same reuse list. Penalty terms of the routes in a given reuse
 list are then re-computed only when necessary.
@@ -179,7 +183,7 @@ penalty term is low enough.
 The core of the damping algorithm lies with the \texttt{\small damping\_info} 
 structure. The penalty term is stored in that structure, 
 along with a timestamp indicating when the last update of the penalty term was.
-Other informations, such as the IP prefix of the route, reuse list pointers 
+Other pieces of information, such as the IP prefix of the route, reuse list pointers 
 and route attributes (BIRD specific) are also included in \texttt{\small damping\_info}.
 One such structure is allocated once a route starts to flap, and is de-allocated 
 whenever the penalty term becomes ``small enough''.
@@ -242,8 +246,8 @@ The default parameters (hard coded in \textsl{damping.h}) are :
 
 The {\tt\small route damping} parameters can be used to enable/disable
 route damping for a particular neighbour. All the other parameters used by
-the RFC (\textit{e.g.} decay arrays, scaling factor, ...) are derived from
-those four values.
+the RFC (\textit{e.g.} decay arrays, scaling factor, ...) are either derived from
+those four values or hard coded, as they should be hidden to the end-user.
 
 BIRD uses Bison to parse the configuration files and we had to extend it 
 to support the new set of keywords. Those parameters are passed to the 
@@ -268,8 +272,8 @@ When a route is removed for the first time, a new {\tt\small damping\_info}
 is allocated in a {\tt\small damping\_info\_fib}, and its penalty term is set to 
 a default value. The penalty term of this route is updated as the route is re-advertised
 and removed again. In particular, when the route is removed, its penalty term is
-updated and then incremented by a default value : 1000, whereas when it is added,
-its penalty term is just updated. The penalty term is represented by a scaled integer,
+updated and then incremented by a default value : 1000, whereas its pernalty term is just
+updated whe it is added. The penalty term is represented by a scaled integer,
 so that only the right level of precision is kept during execution.
 The main idea is that floating point operations are used when the figure of merit needs
 to be updated, but the result is stored as an integer (thus saving memory space).
@@ -308,14 +312,14 @@ We carried out 3 experiments, with the same updates and different settings:
 
 \begin{enumerate}
 \item The first experiment was run with the original BIRD code, without route damping.
-\item The second one had route damping enabled and used the default parameters.
-\item The third one used a more aggressive \texttt{\small cut\_threshold} : 
+\item The second had route damping enabled and used the default parameters.
+\item The third used a more aggressive \texttt{\small cut\_threshold} : 
 it was lowered to 1000 (vs 1500 for the default setting).
 \end{enumerate}
 
 During these experiments, the number of updates and withdrawals were collected every 10 seconds 
 (\textit{i.e.} we collected the total number of update/withdrawals received at every router).
-The number of dampened routes was also collected, for the settings where route damping was enabled.
+The number of dampened routes was also collected, for the settings with route damping enabled.
 The number of updates/withdrawals cumulates over time, whereas the number of dampened routes is immediate.
 In the following subsections, the analysis of thoses measurements demonstrates the effectiveness
 of route flap damping in the above-mentioned network.
@@ -335,8 +339,7 @@ of each route would have decayed below \texttt{\small reuse\_threshold}.
 \begin{center}
 \includegraphics[scale=.5]{img/dampened_paths.pdf}
 \end{center}
-\caption{Evolution of the number of dampened paths for experiments 2 and 3.
-The replayed updates contain some misbehaving routes.}
+\caption{Evolution of \textbf{dampened paths} for experiments 2 and 3.}
 \label{fig_dampenedpaths}
 \end{figure}
 
@@ -352,7 +355,7 @@ Figure \ref{fig_diff_updates} represents the number of updates blocked by the da
 It's the number of updates in experiment 1 minus the number of updates in experiment 3. The 
 total is quite representative of the benefits of BGP route flap damping: about 9000 updates 
 could be avoided in the whole network. Even though it only accounts for a 2\% decrease 
-of the total number of updates exchanged, the benefit would be clear in a real life scenario, 
+in the total number of updates exchanged, the benefit would be clear in a real life scenario, 
 when much more traffic and many more routers are involved.
 
 \begin{figure}
@@ -367,7 +370,7 @@ when much more traffic and many more routers are involved.
 \begin{center}
 \includegraphics[scale=.5]{img/diff_exp1_exp3_updates.pdf}
 \end{center}
-\caption{Number of blocked updates in experiment 3.}
+\caption{Number of \textbf{blocked updates} in experiment 3.}
 \label{fig_diff_updates}
 \end{figure}
 
@@ -375,7 +378,7 @@ when much more traffic and many more routers are involved.
 
 Similarly, we measured the number of withdrawals per AS for all experiments. 
 Figure \ref{fig_exp1_withdraws} shows the evolution of withdrawal messages when damping was not enabled, whereas figure \ref{fig_diff_withdraws}
-shows the number of withdraws that were blocked during the experiment 3. (The difference with respect to experiment 1).
+shows the number of withdraws that were blocked during experiment 3. (The difference with respect to experiment 1).
 About 650 withdraw messages were blocked after 15 minutes, which is approximately 10\% of the total number of withdraws received. The ratio is clearly 
 better than for import updates in the previous subsection. The whole network gains in stability by receiving less withdrawals.
 
@@ -391,7 +394,7 @@ better than for import updates in the previous subsection. The whole network gai
 \begin{center}
 \includegraphics[scale=.5]{img/diff_exp1_exp3_withdraws.pdf}
 \end{center}
-\caption{Number of blocked withdraws in experiment 3}
+\caption{Number of \textbf{blocked withdraws} in experiment 3}
 \label{fig_diff_withdraws}
 \end{figure}
 
@@ -401,7 +404,7 @@ Implementing one RFC for a routing software was not trivial. We managed to do it
 in a couple of weeks; the well-written coder's doc\cite{codersdoc} really helped us for this project.
 Evaluation has been carried out on a small real-scale basis, with a network of 10 AS's and 27 routers. 
 The measurements and corresponding analysis have shown that a ``simple'' method (around 1000 lines of C code) 
-like that presented in RFC 2439 can significantly improve the overall health of a whole network.
+like that presented in RFC 2439 can significantly improve the overall health of a network.
 It not only reduces the traffic, but can also help BGP converge by preventing unwanted routing traffic from 
 spreading to the whole network.
 
@@ -412,10 +415,10 @@ For instance, the RFC suggests that a network administrator may want to have dif
 are reachable or not. Alternate paths could also have been considered, before damping a route.
 
 Initially, we also wanted to improve the algorithm of the RFC with a state-of-the-art extension, but understanding 
-BIRD's code without prior experience took us more time than expected, and we eventually ran
+BIRD's code without prior experience took us more time than expected. We eventually ran
 out of time and could barely finish the testing phase.
-What's more, the Ipv6 version of route damping has not been implemented, but it should be quite easy to extend the current hooks and code.
-Finally, it would have been really interesting to test route damping on a real internet, and with more updates
+What's more, the Ipv6 version of route damping has not been implemented, but it should be quite easy to extend the current code.
+Finally, it would have been really interesting to test route damping on a real internet, with more updates
 than the 15 minutes dumps that have been replayed.
 
 \section*{Acknowledgment}
