@@ -289,8 +289,7 @@ new {\tt\small damping\_info} structure).
 
 \subsection{Overview}
 
-We used a topology of 27 routers in the NSL cluster to evaluate
-it on a real scale basis.
+We used a topology of 27 routers in the NSL cluster to evaluate our implementation on a real scale basis.
 This topology is composed of 10 Autonomous Systems and is displayed in figure \ref{fig_topo}
 \begin{figure}
 \begin{center}
@@ -300,12 +299,11 @@ This topology is composed of 10 Autonomous Systems and is displayed in figure \r
 \label{fig_topo}
 \end{figure}
 
-The experiment replays updates contained into an archive,
+The experiment replays updates contained in an archive,
 \textsl{updates.20100401.1729} (the archive comes from \cite{routeviews}).
 This archive is composed of advertisements sent by 11 BGP routers and collected
 over a period of time of 15 minutes.
-All updates are sent to router 3 (\texttt{\small 10.0.0.3}), which then relays them
-in the network.
+All updates are sent to router 3 (\texttt{\small 10.0.0.3}), and then relayed into the network.
 We carried out 3 experiments, with the same updates and different settings:
 
 \begin{enumerate}
@@ -326,12 +324,12 @@ of route flap damping in the above-mentioned network.
 
 The evolution of dampened paths is shown on figure \ref{fig_dampenedpaths}: about 120 routes
 are damped when reaching the end of the updates period.
-The trend is similar for both experiments 2 and 3. This is an expected result, as we use the 
-same updates in both cases. We note however that there are more routes that are damped with 
-a more aggressive \texttt{\small reuse\_threshold} in experiment 3.
-The number of damped routes grows with time. If we had waited more time without sending new 
-updates, then the curve would have sunk and finally reached zero, as the penalty 
-of each route would have decayed below the \texttt{\small reuse\_threshold}.
+The trend is similar for both experiments 2 and 3.
+This is an expected result, as the exact same updates are sent in both cases.
+We note however that more routes are damped with the more aggressive \texttt{\small reuse\_threshold} of experiment 3.
+The number of damped routes grows with time.
+Had we waited more time without sending any new updates, the curve would have sunk to eventually reach zero, as the penalty 
+of each route would have decayed below \texttt{\small reuse\_threshold}.
 
 \begin{figure}
 \begin{center}
@@ -369,7 +367,7 @@ when much more traffic and many more routers are involved.
 \begin{center}
 \includegraphics[scale=.5]{img/diff_exp1_exp3_updates.pdf}
 \end{center}
-\caption{Number of updates that could be blocked with damping in experiment 3.}
+\caption{Number of blocked updates in experiment 3.}
 \label{fig_diff_updates}
 \end{figure}
 
@@ -393,15 +391,14 @@ better than for import updates in the previous subsection. The whole network gai
 \begin{center}
 \includegraphics[scale=.5]{img/diff_exp1_exp3_withdraws.pdf}
 \end{center}
-\caption{Number of withdraws that could be blocked with damping in experiment 3}
+\caption{Number of blocked withdraws in experiment 3}
 \label{fig_diff_withdraws}
 \end{figure}
-
 
 \section{Conclusion}
 
 Implementing one RFC for a routing software was not trivial. We managed to do it for the Bird routing project 
-in a couple of weeks; luckily, the well-written coder's doc\cite{codersdoc} really helped us along this project.
+in a couple of weeks; the well-written coder's doc\cite{codersdoc} really helped us for this project.
 Evaluation has been carried out on a small real-scale basis, with a network of 10 AS's and 27 routers. 
 The measurements and corresponding analysis have shown that a ``simple'' method (around 1000 lines of C code) 
 like that presented in RFC 2439 can significantly improve the overall health of a whole network.
