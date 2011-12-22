@@ -27,14 +27,14 @@ Routing Project}
 Today's Internet stability strongly relies on the good behaviour of
 dynamic routing protocols such as BGP (Border Gateway Protocol), which
 enables routing between Autonomous Systems. Route flapping is a well-known
-and undesirable phenomenon occuring in both commercial and private
+and undesirable phenomenon occurring in both commercial and private
 networks. In this report, we explain our implementation of the RFC
 2439, BGP Route Flap Damping, for one famous Open Source routing software
 suite, the Bird Routing Project.
 
 We also present results of 3 experiments leading to a comparison on the impact that
 BGP updates have in a network with and without route flap damping. The setup was
-such that only one of the bgp routers was receiving updates from the external world.
+such that only one of the BGP routers was receiving updates from the external world.
 \end{abstract}
 
 \section{Introduction}
@@ -42,7 +42,7 @@ such that only one of the bgp routers was receiving updates from the external wo
 The inter-domain routing protocol BGP is still surviving to the gigantic
 growth of the Internet that started during the last decade. However,
 some widely used applications, such as Skype, still suffer from weaknesses
-in that protocol. The main problems are twofolds: firstly, BGP has
+in that protocol. The main problems are twofold: firstly, BGP has
 a slow convergence time, meaning that a change at one location can take
 long before it is propagated to the other ends of the network.
 Secondly, if a node becomes unstable, for example if its connectivity
@@ -51,13 +51,13 @@ network, both in terms of useless processing at BGP routers and unnecessary
 routing traffic. Routes advertised and withdrawn at regular interval
 of time are said to be \textit{flapping}.
 
-Many approaches to counter route flapping were developped in
+Many approaches to counter route flapping were developed in
 the late 90's. RFC 2439\cite{rfc2439} standardized one such approach:
 it basically blocks updates from flapping routes, and does so until
 the routes are deemed stable again. This RFC has been used extensively
 for many years, in both commercial and open source routers.
 
-Although this standard is not recommended anymore\cite{ripe recommendations}
+Although this standard is not recommended any more\cite{ripe recommendations}
 for today's routers, we wanted to implement it for the Bird Routing
 Project\cite{bird}, hoping that it would serve as a good basis for
 future possible improvements and extensions. There exist
@@ -87,7 +87,7 @@ figure of merit keeps trace of previous instabilities for a fairly
 long time : old instabilities become less and less important over
 time, whereas fresh ones get penalized.
 
-Network administrators have lots of freedom in choosing the behavior
+Network administrators have lots of freedom in choosing the behaviour
 of the penalty term : they can control the half-life of the penalty
 term, the maximum time interval a route can be suppressed (thus 
 controlling the maximum penalty) and both the reuse and cut thresholds.
@@ -272,14 +272,14 @@ When a route is removed for the first time, a new {\tt\small damping\_info}
 is allocated in a {\tt\small damping\_info\_fib}, and its penalty term is set to 
 a default value. The penalty term of this route is updated as the route is re-advertised
 and removed again. In particular, when the route is removed, its penalty term is
-updated and then incremented by a default value : 1000, whereas its pernalty term is just
-updated whe it is added. The penalty term is represented by a scaled integer,
+updated and then incremented by a default value : 1000, whereas its penalty term is just
+updated when it is added. The penalty term is represented by a scaled integer,
 so that only the right level of precision is kept during execution.
 The main idea is that floating point operations are used when the figure of merit needs
 to be updated, but the result is stored as an integer (thus saving memory space).
 This usually results in an accidental loss of precision, except that in our case,
 the decrease in precision is controlled so as not to crash the application. 
-Penalty terms are all implicitely multiplied by 1000, implying that only three digits 
+Penalty terms are all implicitly multiplied by 1000, implying that only three digits 
 after the dot are kept.
 
 {\tt\small damping\_info} are de-allocated when the penalty gets smaller than
