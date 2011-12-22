@@ -148,19 +148,19 @@ Their definitions can be found in {\sl damping.h}.
 
 {\tt\small damping\_config} groups all configurations parameters for a BGP peer.
 This allows network administrators to have different sets of parameters for
-differents routes. {\it I.e} \texttt{\small damping\_config}s have a 
+different routes. {\it I.e} \texttt{\small damping\_config}s have a 
 one-to-one relation to BIRD's \texttt{\small bgp\_proto}.
 This structure contains all the parameters controlling the behaviour 
 of the damping algorithm :
 \texttt{\small reuse\_threshold}, \texttt{\small cut\_threshold}, 
 \texttt{\small ceiling}, \texttt{\small tmax\_hold} and \texttt{\small half\_time}.
-Additionally, it contains some informations used to speedup the algorithm
+Additionally, it contains some information used to speedup the algorithm
 (at the cost of a more important memory consumption) : both the decay
 arrays and the reuse lists are contained here. The former speeds up the
 computation of new figure of merits by pre-computing a predefined set
-of (costy) exponentials and using them when figures of merit needs to 
+of (costly) exponentials and using them when figures of merit needs to 
 be updated.
-The latter limitates the time of computation at every timer tick by 
+The latter limits the time of computation at every timer tick by 
 grouping damped routes according to their penalty term.
 Instead of being updated at every tick, a group of routes is updated 
 once every $n$ ticks, where $n$ is the number of reuse lists.
