@@ -1,5 +1,5 @@
 This git repository contains all the code developed for the implementation
-of RFC 2439 BGP Route flamp damping for the Bird Routing project. 
+of RFC 2439 BGP Route flap damping for the Bird Routing project. 
 The modified bird is located in the bird directory. Before compiling it
 please configure it with the option --enable-route-damping.
 
